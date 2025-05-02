@@ -1,0 +1,37 @@
+ PHYSICAL PARAMETERS
+ 
+ C =
+           20.0000000000
+ Pstar =
+        27500.0000000000
+ e =
+            2.0000000000
+ 
+ DEFINITION OF THE RUN
+ 
+ dx (m) =
+        10000.0000000000
+ dt (s) =
+          100.0000000000
+ linear water drag =
+ T
+ linear viscous =
+ F
+ constant wind =
+ T
+ OCEAN MODEL
+ ocean model is =
+ F
+ 
+ SOLVER AND NUMERICS
+ 
+ SOLVER = 
+1
+ omega (sor) =
+            1.5000000000
+ nb of sor ite =
+010
+ max nb of gmres ite = 
+050
+ gamma_nl (tol) =
+            0.0010000000

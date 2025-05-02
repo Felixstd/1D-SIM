@@ -8,7 +8,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   use option
   implicit none
 
-  character filename*80
+  character filename*90
 
   integer :: i, k, Dt, Dx, adv
   integer, intent(in) :: ts, expnb, solver
@@ -49,19 +49,19 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
    Erate(i) = utp(i) * ( sigma(i) - sigma(i-1) ) / Deltax
   enddo
   
-  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver,IMEX, adv,BDF2,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (13, file = filename, status = 'unknown')
 
