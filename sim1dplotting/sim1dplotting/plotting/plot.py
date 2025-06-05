@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import cmocean
-import scienceplots
+# import scienceplots
 
-plt.style.use('science')
+# plt.style.use('science')
+plt.style.use('/aos/home/fstdenis/1D-SIM/sim1dplotting/science.mplstyle')
 
 def normalize_stresses(sigI, sigII, p, eps = 1e-12):
     

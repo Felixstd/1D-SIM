@@ -37,7 +37,7 @@ print('Time steps', dates.T)
 dt = 1
 time = dates*dt/(60*60)
 
-dx = 1
+dx = 10
 solv = 1
 imex  = 0
 adv = 1
