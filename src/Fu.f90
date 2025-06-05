@@ -95,7 +95,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
 !------------------------------------------------------------------------
      
 ! !     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uw(i) )
-     R_vec(i) = R_vec(i) !- a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
+     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
 !                                                                ! with NEMO
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag
