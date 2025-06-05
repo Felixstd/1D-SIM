@@ -56,7 +56,8 @@ program ice
 !------------------------------------------------------------------------
 !     Input by user
 !------------------------------------------------------------------------
-  expnb      = 13
+   !---- I = 0.1 -----!
+  expnb      = 23
   rheo           = 2
   linear_drag    = .true.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
@@ -74,9 +75,9 @@ program ice
   idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
-  solver     = 1        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
-  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
+  solver     = 1     ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
   
 !   T_tot      = 2*60*60
   T_tot      = 4*24*60*60
@@ -167,7 +168,7 @@ program ice
   elseif  ( nx .eq. 200 ) then
      Deltax   =  10d03            
   elseif  (( nx .eq. 400 ) .or. (nx .eq. 1000)) then
-     Deltax   =  1d03       
+     Deltax   =  1d03
    elseif  ( nx .eq. 500 ) then
      Deltax   =  4d03        
   else
@@ -207,11 +208,11 @@ program ice
   Cdw        = rhowater * Cdwater
   
   ! Mu-Phi Parameters 
-   d_average  = 1d03
-   mu_0       = 0.4
+   d_average  = 1000
+   mu_0       = 0.1
    mu_infty   = 0.8
-   I_0        = 1e-3         
-   mu_b       = 0.5
+   I_0        = 1e-3
+   mu_b       = 1/2
    Phi_0      = 1
    c_phi      = 1
 
@@ -303,9 +304,9 @@ program ice
      do k = 1, Nmax_OL 
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
-         call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
+            call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
          ! call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
-               call shear(un1)
+            call shear(un1)
             call ice_strength (h, A) ! standard approach no IMEX 
             call inertial_number()
             call angle_friction_mu()

@@ -46,7 +46,8 @@ subroutine inertial_number
 
     do i = 0, nx+1
 
-        Inertial(i) = max(d_average * shear_I(i) * SQRT(rho * h(i)/Pp(i)), 1d0)
+        Inertial(i) = min(d_average * shear_I(i) * SQRT(rho * h(i)/Pp(i)), 1d0)
+        ! Inertial(i) = 1
 
     enddo
 

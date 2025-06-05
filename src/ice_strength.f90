@@ -30,7 +30,6 @@ subroutine ice_strength ( hin, Ain )
 
       ! Peq(i) = rho * hin(i) * (( d_average * shear_I(i) ) / ( Ain(i) - Phi_0 ))**2 
 
-      ! Pp(i) = min(Peq(i), Pmax(i))
     enddo
 
   endif

@@ -24,12 +24,12 @@ subroutine viscouscoefficient(zeta, eta)
             
                 shearmax = max(shear_I(i), 1d-20)
                 
-                zeta(i) = 1d08
-                ! zeta(i) = 2d08*Pp(i) * tanh((mu_b) / (shearmax * 2d08))
-                ! eta(i)  = eta_max * tanh((mu_I(i)) * Pp(i) / (shearmax * eta_max))
-                eta(i) = 1d08
+                ! zeta(i) = 1d08
+                zeta(i) = 2d08*Pp(i) * tanh((mu_b) / (shearmax * 2d08))
+                eta(i)  = eta_max * tanh((mu_I(i)) * Pp(i) / (2d0 * shearmax * eta_max))
+                ! eta(i) = 1d08
             endif
-            print*, eta(i), zeta(i)
+            ! print*, eta(i), zeta(i)
 
             P(i) = Pstar
         

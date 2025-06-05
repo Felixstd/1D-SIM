@@ -100,7 +100,7 @@ program ice
     mu_0       = 0.1
     mu_infty   = 0.8
     I_0        = 1e-3         
-    mu_b       = 0.1
+    mu_b       = 1/2
     Phi_0      = 1
     c_phi      = 1
 

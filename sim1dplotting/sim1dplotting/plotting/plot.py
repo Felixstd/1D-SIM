@@ -64,6 +64,9 @@ def plot_individual_time(dates, expno, data_dict, dx, figdir, mu_0, mu_infty, Mu
     fig_all_h = plt.figure(2)
     ax_all_h = plt.axes()
     
+    fig_all_u = plt.figure(3)
+    ax_all_u = plt.axes()
+    
     for k, date in enumerate(dates):
         
         print('Plotting: ', date)
@@ -108,6 +111,7 @@ def plot_individual_time(dates, expno, data_dict, dx, figdir, mu_0, mu_infty, Mu
         ax2.set_aspect(1./ax2.get_data_ratio())
         
         ax_all_A.plot(X[1:-1], A[1:-1], label = '{}'.format(date))
+        ax_all_u.plot(X[1:-1], u[:-1], label = '{}'.format(date))
         ax_all_h.plot(X[1:-1], 1-h[1:-1], label = '{}'.format(date))
         
         
@@ -115,17 +119,26 @@ def plot_individual_time(dates, expno, data_dict, dx, figdir, mu_0, mu_infty, Mu
         
         fig.savefig(figdir+'ice_A_h_{}_{}.png'.format(date, expno))
     
-    ax_all_A.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    # ax_all_A.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax_all_A.grid()
     ax_all_A.set_xlabel('X (km)')
     ax_all_A.set_ylabel('A')
     fig_all_A.savefig(figdir+'time_plot_A_{}.png'.format(expno))
+    plt.close()
     
     ax_all_h.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax_all_h.grid()
     ax_all_h.set_xlabel('X (km)')
     ax_all_h.set_ylabel('1-h (m)')
     fig_all_h.savefig(figdir+'time_plot_h_{}.png'.format(expno))
+    plt.close()
+    
+    # ax_all_h.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    ax_all_u.grid()
+    ax_all_u.set_xlabel('X (km)')
+    ax_all_u.set_ylabel('u (m/s)')
+    fig_all_u.savefig(figdir+'time_plot_u_{}.png'.format(expno))
+    plt.close()
         
         
 def plot_variable(dx, time, var, label, norm, cmap, expno, figdir, varname) : 
@@ -141,6 +154,7 @@ def plot_variable(dx, time, var, label, norm, cmap, expno, figdir, varname) :
     plt.xlabel('Time (hr)')
     plt.ylabel('x (km)')
     plt.savefig(figdir+'Evolution_{}_{}.png'.format(expno, varname))
+    plt.close()
         
     
     

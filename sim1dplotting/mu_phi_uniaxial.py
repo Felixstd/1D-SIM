@@ -7,124 +7,20 @@ import matplotlib.colors as colors
 import cmocean as cm
 import warnings
 
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--expno', dest='expno', type=str, help='Experiment number')
+args = parser.parse_args()
+expno = str(args.expno)
+
 warnings.filterwarnings("ignore")
 
 # For 1 to 13
 #--- Dates of the simulation ---#
 #---   They are in seconds   ---#
- 
 
-dates = np.array([720,
-        1440,
-        2160,
-        2880,
-        3600,
-        4320,
-        5040,
-        5760,
-        6480])
-
-dates = np.array([  0,
-           7,
-          14,
-          21,
-          28,
-          35,
-          42,
-          49,
-          56,
-          63])
-
-dates = np.array([0, 864,
-        1728,
-        2592,
-        3456,
-        4320,
-        5184,
-        6048,
-        6912, 
-        7776])
-
-# dates = np.array([ 0,
-#        86400])
-#       172800,
-#       259200,
-#       345600,
-#       432000,
-#       518400,
-#       604800,
-#       691200,
-#       777600,
-#       864000])
-
-# dates = np.array([0,
-#         2592,
-#         5184,
-#         7776,
-#        10368,
-#        12960,
-#        15552,
-#        18144,
-#        20736,
-#        23328])
-# dates = np.array([0,
-#         1728,
-#         3456,
-#         5184,
-#         6912,
-#         8640,
-#        10368,
-#        12096,
-#        13824,
-#        15552])
-
-# dates = np.array([0,
-#          720,
-#         1440,
-#         2160,
-#         2880,
-#         3600,
-#         4320,
-#         5040,
-#         5760,
-#         6480])
-
-# dates = np.array([0,
-#         8640,
-#        17280,
-#        25920,
-#        34560,
-#        43200,
-#        51840,
-#        60480,
-#        69120,
-#        77760])
-
-        #    0
-        #  864
-        # 1728
-        # 2592
-        # 3456
-        # 4320
-        # 5184
-        # 6048
-        # 6912
-        # 7776
-        # 8640
-        
-dates = np.array([8640,
-       17280,
-       25920,
-       34560,
-       43200,
-       51840,
-       60480,
-       69120,
-       77760])
-
-
-
-expno = '08'
 outputdir = "/aos/home/fstdenis/1D-SIM/output/"
 figdir = '/aos/home/fstdenis/1D-SIM/Experiments/'+expno+'/'
 
@@ -153,18 +49,15 @@ N_transect = 101
 muphi = 0
 
 
-# mu_0 = 0.1
-
-# mu_infty = 0.9
-
 #---------- READING DATA ----------#
 datadict = read_data.read_data(expno, dt, dx, solv, imex, adv, dates, outputdir, MuPhi = muphi)
 divergence_tot, h_tot, A_tot, u_tot = datadict.values()
 
+nx = np.shape(A_tot[0])[0]
+X = np.linspace(0, nx*dx, nx)
 
-
-
-plot.plot_variable(dx, time, np.array(A_tot), r'$A$ (m)', colors.Normalize(vmin=0, vmax=1e-7), cm.cm.ice, expno,figdir, 'h')
+# 
+plot.plot_variable(dx, time, np.array(A_tot), r'$A$', colors.SymLogNorm(vmin=0, vmax=1, linthresh=0.1), cm.cm.ice, expno,figdir, 'A')
 
 #---------- Analysing Wind Forcing----------#
 # analysis.wind_forcing(datadict, N_transect, dy, Ny, time, figdir+expno+'/', muphi)
@@ -175,4 +68,18 @@ plot.plot_variable(dx, time, np.array(A_tot), r'$A$ (m)', colors.Normalize(vmin=
 #---------- Plotting ----------#
 plot.plot_individual_time(dates, expno, datadict, dx, figdir, 0, 0, MuPhi = muphi)
 
+#----- Initial Conditions ------#
+A_init = A_tot[0]
+h_init = h_tot[0]
+u_init = u_tot[0]
+
+plt.figure()
+ax1 = plt.axes()
+ax2 = ax1.twinx()
+ax1.plot(X, A_init, color = 'b')
+ax1.set_ylabel(r'$A, \; h$ (m)',color = 'k' )
+ax2.plot(X[1:], u_init, linestyle = '--', color = 'k')
+ax2.set_ylabel(r'$u$ (m/s)', color='b')
+ax2.tick_params(axis='y', labelcolor='b')
+plt.savefig('init_conditions.png')
 

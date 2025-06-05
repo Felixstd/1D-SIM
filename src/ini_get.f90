@@ -77,12 +77,23 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
       if (nx .eq. 400) then
          A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+         ! A(i) = min(exp(-0.0001*(real(i) - real(nx)/2d0)**2d0), 1d0)
+         ! if (i < 10) then
+         !    A(i) = 0d0 
+         ! elseif (i > (nx-10)) then 
+         !    A(i) = 0d0 
+         ! else 
+         !    A(i) = 1d0
+         ! endif
+      
       elseif (nx .eq. 1000) then
          A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
       endif
 
-       if (A(i) .gt. 0d0) then  
-         h(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+      if (A(i) .gt. 0d0) then  
+         ! h(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+         h(i) = 1d0
+         ! h(i) = min(exp(-0.0001*(real(i) - real(nx))**2d0), 1d0)
       endif
 
   enddo
@@ -102,14 +113,6 @@ subroutine ini_get (utp, restart, expres, ts_res)
       uw(i)  = 0d0
   enddo
 
-!   do i = 0, nx+1
-!      h(i) = 1d0
-!      A(i) = 1d0
-!      mu_I(i) = mu_0
-! !     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall                                                                   
-! !     h(i) = max(1d-06, h(i))
-! !     bathy(i)=100d0
-!   enddo
   
   if (oceanSIM) then 
      uwn1=uw

@@ -23,28 +23,19 @@ subroutine viscouscoefficient(utp, zeta, eta)
   if (rheo .eq. 2) then
 
     do i = 1, nx
-
-      ! zeta(i) = mu_I(i) * Pp(i) / shear_I(i)
-
-      ! eta(i)  = mu_b * Pp(i) / shear_I(i)
-
+      shearmax = max(shear_I(i), 1d-20)
       if (regularization .eq. 'tanh') then
-        ! zeta(i) = min( mu_I(i) * Pp(i) / shear_I(i), 2d08*Pp(i))
-
-        ! eta(i)  = min(mu_b * Pp(i) / shear_I(i), eta_max )
-        shearmax = max(shear_I(i), 1d-20)
-        
-        ! if (shearmax < 0) then
-        !   mu_b = 2d0
-        ! else 
-        !   mu_b = 0.5d0
-        ! endif
 
         zeta(i) = 2d08*Pp_half(i) * tanh((mu_b) / (shearmax * 2d08))
         eta(i)  = eta_max * tanh((mu_I(i) / 2) * Pp_half(i) / (shearmax * eta_max))
 
-      endif
+      elseif (regularization .eq. 'capping') then
 
+        zeta(i) = min(2d08*Pp_half(i),  (mu_b) *Pp_half(i) / (shearmax))
+        eta(i)  = min(eta_max, (mu_I(i) / 2) * Pp_half(i) / (shearmax))
+
+
+      endif
       P_half(i) = Pp_half(i)
 
 
@@ -110,10 +101,6 @@ subroutine viscouscoefficient(utp, zeta, eta)
     endif
 endif 
 
-  ! do i  = 1, nx 
-  !   print*, 'zeta',  zeta(i)
-    
-  ! enddo
   return
 end subroutine viscousCoefficient
 

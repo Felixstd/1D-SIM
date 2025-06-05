@@ -25,7 +25,7 @@ subroutine ini_get(utp)
         if (A(i) .gt. 0d0) then  
             h(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
             ! print*, real(i)
-            utp(i) = real(i)/1000d0
+            utp(i) = h(i)/100d0
             print*, utp(i)
         endif
 
