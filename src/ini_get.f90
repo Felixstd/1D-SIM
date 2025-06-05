@@ -76,15 +76,20 @@ subroutine ini_get (utp, restart, expres, ts_res)
   do i = 1, nx
 
       if (nx .eq. 400) then
-         A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-         ! A(i) = min(exp(-0.0001*(real(i) - real(nx)/2d0)**2d0), 1d0)
+
+         if (initcond .eq. 'step') then
+
+            A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+
+         elseif (initcond .eq. 'gaussian') then
+            A(i) = min(exp(-0.0001*(real(i) - real(nx)/2d0)**2d0), 1d0)
          ! if (i < 10) then
          !    A(i) = 0d0 
          ! elseif (i > (nx-10)) then 
          !    A(i) = 0d0 
          ! else 
          !    A(i) = 1d0
-         ! endif
+         endif
       
       elseif (nx .eq. 1000) then
          A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)

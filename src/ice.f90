@@ -215,6 +215,7 @@ program ice
    mu_b       = 1/2
    Phi_0      = 1
    c_phi      = 1
+   initcond   = 'gaussian'
 
 
 
