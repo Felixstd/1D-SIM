@@ -15,19 +15,19 @@ subroutine bvect(tauair, un1, Cw, b)
 
   b(1)    = 0d0 ! close bc
   b(nx+1) = 0d0 ! close bc 
-  b(nx) = 0d0
+  ! b(nx) = 0d0
   do i = 2, nx
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
      a_at_u = ( A(i) + A(i-1) ) / 2d0
      a_at_u=max(a_at_u, smallA)
 
-    !  b(i) = !a_at_u*tauair(i) + a_at_u*Cw(i)*uwn2(i) - &
-    !         -( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat !- &
-    !         !rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
+     b(i) = a_at_u*tauair(i) + a_at_u*Cw(i)*uwn2(i) - &
+            ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat - &
+            rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
       ! print*, 'b' , - ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat 
 
-     b(i) =  - ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat 
+    !  b(i) =  - ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat 
   
 
   enddo

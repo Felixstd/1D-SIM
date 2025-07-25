@@ -1,0 +1,32 @@
+[Experiment]
+expno      = 67
+savevar     = 0
+plot_fields = 1
+read_all    = 1
+plot_single = 1
+residual_analysis = 0
+energy_dissipation = 1
+maxvelocities = 0
+
+[Time]
+start_k    = 1
+dt  = 1
+
+[Rheology]
+muphi = 0
+mub   = 1
+mu0 = 0.1
+muinf = 0.8
+dx    = 10
+Nx    = 402
+advection_scheme   = 1
+imex  = 0
+solver   = 1
+maxcapping = 1.25e12, 1.25e8
+
+
+[Figures]
+outputdir = /aos/home/fstdenis/1D-SIM/output/
+figdir    = /aos/home/fstdenis/1D-SIM/Experiments/
+
+

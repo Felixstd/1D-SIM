@@ -10,11 +10,11 @@
  DEFINITION OF THE RUN
  
  dx (m) =
-         5000.0000000000
+        10000.0000000000
  dt (s) =
             1.0000000000
  linear water drag =
- T
+ F
  linear viscous =
  F
  constant wind =
@@ -34,4 +34,4 @@
  max nb of gmres ite = 
 050
  gamma_nl (tol) =
-            0.0100000000
+            0.0001000000

@@ -49,25 +49,29 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
    Erate(i) = utp(i) * ( sigma(i) - sigma(i-1) ) / Deltax
   enddo
   
-  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/h_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver,IMEX, adv,BDF2,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/A_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/u_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/div_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (13, file = filename, status = 'unknown')
 
-!  write (filename, '("output/zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
-!		    IMEX, adv,ts,expnb
-!  open (14, file = filename, status = 'unknown')
+ write (filename, '("output/zeta_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
+ open (14, file = filename, status = 'unknown')
+
+  write (filename, '("output/eta_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
+ open (15, file = filename, status = 'unknown')
 
 !  write (filename, '("output/sigma_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
 !		    IMEX, adv,ts,expnb
@@ -81,22 +85,28 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 !		    IMEX, adv,ts,expnb
 !  open (17, file = filename, status = 'unknown')
 
-  write (filename, '("output/Er_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+  write (filename, '("output/Er_",i5.5,"s_",i5.5,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (18, file = filename, status = 'unknown')
+
+  write (filename, '("output/Wdissip_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+ open (20, file = filename, status = 'unknown')
 
 
   write(10,10) ( h(i),       i = 0, nx+1 )
   write(11,10) ( A(i),       i = 0, nx+1 )
   write(13,10) ( div(i),     i = 0, nx+1 )
-!  write(14,10) ( zeta(i),    i = 0, nx+1 )
+ write(14,*) ( zeta(i),    i = 0, nx+1 )
+  write(15, *) (eta(i), i = 0, nx+1)
 !  write(15,10) ( sigma(i),   i = 0, nx+1 )
 !  write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
 !  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
   write(12,10) ( utp(i),       i = 1, nx+1 )
   write(18,10) ( Erate(i),     i = 1, nx+1 )
+  write(20,*) ( W_sigma(i),     i = 0, nx+1 )
 
-  do k = 10, 18
+  do k = 10, 20
      close(k)
   enddo
 
@@ -150,6 +160,50 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   return
 end subroutine output_results
 
+
+subroutine output_sor(ts, k, solver, expnb, F)
+
+  use size
+  use resolution
+  use global_var
+  use shallow_water
+  use MOMeqSW_output
+  use rheology
+  use option
+
+    implicit none
+
+    character filename*90
+
+
+    integer :: i, Dt, Dx, adv
+  integer, intent(in) :: ts, k, expnb, solver
+  double precision, intent(in):: F(1:nx+1)
+ 
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+
+  Dt=int(Deltat) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+  
+  
+  write (filename, '("output/b_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (11, file = filename, status = 'unknown')
+  
+  write(11,*) ( F(i), i = 1, nx+1 )
+
+  close(11)
+  
+10 format (1x, 2000(f25.18, 1x))
+
+  return
+
+end subroutine
+
 subroutine output_residual(ts, k, expnb, F)
   use size
   use resolution
@@ -172,7 +226,7 @@ subroutine output_residual(ts, k, expnb, F)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
   
-  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt, &
+  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i5.5,".",i2.2)') Dt, &
 		    Dx,IMEX,adv,BDF2,ts,k,expnb
   open (11, file = filename, status = 'unknown')
   
@@ -204,8 +258,8 @@ subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
   Dt=int(Deltat) ! in s
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt, &
-	 Dx,IMEX,adv,BDF2,expnb
+  write (filename, '("output/Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,".",i2.2)') Dt, &
+	 Dx,IMEX,adv,BDF2,ts,expnb
   open (10, file = filename, access = 'append')
   
   write(10,10) ts,k-1,fgmres_per_ts
@@ -237,8 +291,8 @@ subroutine output_ini_L2norm(ts, L2norm, expnb)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
-	 Dx,IMEX,adv,BDF2,expnb
+  write (filename, '("output/iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,".",i2.2)') Dt,&
+	 Dx,IMEX,adv,BDF2,ts,expnb
   open (10, file = filename, access = 'append')
   
   write(10,10) ts,L2norm

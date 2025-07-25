@@ -25,8 +25,8 @@ subroutine Cw_coefficient (utp, Cw, Cb)
 
   if (linear_drag) then
      
-    !  Cw(2:nx) = Cdw*utypical     ! linear water drag
-     Cw(2:nx) = 0d0
+     Cw(2:nx) = Cdw*utypical     ! linear water drag
+    !  Cw(2:nx) = 0d0
   else
      
      do i = 2, nx

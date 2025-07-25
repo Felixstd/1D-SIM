@@ -26,8 +26,8 @@ subroutine wind_forcing (tauair, ts)
     if (constant_wind) then
 
        do i = 2, nx ! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
-         !  tauair(i) = Cda * abs(uwind)*uwind
-          tauair(i) = 0d0
+          tauair(i) = Cda * abs(uwind)*uwind
+         !  tauair(i) = 0d0
 !	tauair(i) = (Cda * abs(uwind)*uwind)*(1d0-exp(-1d0*ts*Deltat/apar)) ! at n       
        enddo
 !       print *, 'tauair', ts, 100d0*tauair(50)/(Cda * abs(uwind)*uwind)

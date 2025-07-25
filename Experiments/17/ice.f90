@@ -15,6 +15,10 @@
 !       version: 1.0 (20 april 2012)
 !
 !************************************************************************
+!---- uice init is 0 -----!
+!----- Removed the step in advection -----!
+!----- WITH WATER DRAG ------!
+!----- capping in VP is 1d8 ------!
 
 program ice
 
@@ -32,7 +36,7 @@ program ice
   
   implicit none
 
-  logical :: p_flag, restart
+  logical :: p_flag, restart, output_diag
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
   integer :: out_step(11), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer :: time_out, n_output, output_time
@@ -56,17 +60,19 @@ program ice
 !------------------------------------------------------------------------
 !     Input by user
 !------------------------------------------------------------------------
-  expnb      = 17
+   !---- I = 0.1 -----!
+  expnb      = 18
   rheo           = 2
-  linear_drag    = .true.
+  linear_drag    = .false.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rampupwind     = .false.
   uwind          = 10d0   ! uwind velocity for constant_wind
-  rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
+  rep_closure    = .false. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
-  regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
+  regularization = 'capping' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
+  initcond       = 'step'
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .false. ! for uwater mom eq.
   Asselin        = .false. ! Asselin filter for uw and etaw
@@ -74,13 +80,15 @@ program ice
   idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
-  solver     = 1        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
-  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
+  solver     = 1     ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
   
-!   T_tot      = 2*60*60
-  T_tot      = 30*24*60*60
-  Deltat     = 1 ! time step [s]
+  T_tot      = 4*24*60*60
+!   T_tot = 10000
+!   T_tot      = 60
+!   T_tot      = 3
+  Deltat     = 1! time step [s]
 !   nstep      = 1440     ! lenght of the run in nb of time steps
   nstep = T_tot/Deltat !lenght of the run in nb of time steps
    ! nstep = 1
@@ -89,7 +97,7 @@ program ice
   time_out = 0
   output_time = 0
   write(10, *) (output_time)
-  out_step(1) = 0
+  out_step(1) = 1
   do n_output = 2, 11
       time_out = time_out + T_tot / 10
       output_time = output_time + nstep/10
@@ -98,6 +106,7 @@ program ice
   enddo
   close(10)
 
+   print*, out_step
 
   Nmax_OL    = 200
 
@@ -108,9 +117,10 @@ program ice
   omega      = 1d0    ! relax parameter for SOR
   tol_SOR    = 1d-10    ! tol for SOR solver
   maxiteSOR  = 10000     ! max nb of ite for SOR
+!   maxiteSOR  = 1
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 50      ! max nb of ite for GMRES
-  gamma_nl = 1d-02
+  gamma_nl = 1d-04
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
@@ -165,9 +175,9 @@ program ice
   if ( nx .eq. 100 ) then 
      Deltax   =  20d03  ! grid size [m], the domain is always 2000 km 
   elseif  ( nx .eq. 200 ) then
-     Deltax   =  10d03            
+     Deltax   =  1            
   elseif  (( nx .eq. 400 ) .or. (nx .eq. 1000)) then
-     Deltax   =  1d03       
+     Deltax   =  1
    elseif  ( nx .eq. 500 ) then
      Deltax   =  4d03        
   else
@@ -183,18 +193,20 @@ program ice
 !------------------------------------------------------------------------
 
   C          = 20d0         ! ice strength parameter (watchout no A for now)
-  Pstar      = 27.5d03      ! ice compression strength parameter
-  e          = 2d0          ! ratio long to short axis of ellipse
+  Pstar      = 27.5d03 ! ice compression strength parameter
+  e          = 2d0    ! ratio long to short axis of ellipse
+  
   e_2        = 1/(e**2d0)   !
   alpha      = sqrt(1d0 + e_2)
   alpha2     = 1d0 + e_2
   kt         = 0d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
 
-  Cdair      = 1.2d-03      ! air-ice drag coeffient 
-  Cdairw     = 1.2d-03      ! air-water drag coeffient 
-  Cdwater    = 5.5d-03      ! water-ice drag coeffient
-!    Cdair      = 0d0    ! air-ice drag coeffient 
-!   Cdairw     = 0d0    ! air-water drag coeffient 
+!   Cdair      = 1.2d-03      ! air-ice drag coeffient 
+!   Cdairw     = 1.2d-03      ! air-water drag coeffient 
+!   Cdwater    = 5.5d-03  ! water-ice drag coeffient
+  Cdwater    = 5.5d-22  
+  Cdair      = 0d0    ! air-ice drag coeffient 
+  Cdairw     = 0d0    ! air-water drag coeffient 
 !   Cdwater    = 0d0   ! water-ice drag coeffient
   rhoair     = 1.3d0        ! air density
   rho        = 900d0        ! ice density
@@ -207,25 +219,33 @@ program ice
   Cdw        = rhowater * Cdwater
   
   ! Mu-Phi Parameters 
-   d_average  = 1d03
-   mu_0       = 0.1
+   d_average  = 1000
+   !Just like VP
+   ! mu_0       = (-4d0+sqrt(20d0))/2d0
+   ! mu_infty   = (-4d0+sqrt(20d0))/2d0
+   ! mu_0       = 1d0/(2d0*alpha)
+   ! mu_infty   = 1d0/(2d0*alpha)
+
+   ! mu_0 = 0.2
+   ! mu_infty = 0.8
+   ! mu_b = 1/2d0
+   ! print*, mu_0, alpha
+   ! mu_b       = 1d0/(alpha)
+
+   mu_0       = 0.2
    mu_infty   = 0.8
-   I_0        = 1e-3         
-   mu_b       = 1
+   ! mu_b       = 1/2d0
+   mu_b = 1/2d0
+   I_0        = 1e-3
+   
    Phi_0      = 1
    c_phi      = 1
+   D = 0.0001 !DEFAULT was -0.00001
+   n = 2 !for super gaussian 
+   eta_max    = 1d12
 
+   output_diag = .false.
 
-
-   ! if ((mu_b > 1-7*mu_0/6) .and. (mu_b > 1-7*mu_infty/6)) then
-   !    print *, 'well-posed condition meet'
-   
-   ! else
-   !    print *, 'well-posed condition not met'
-   !    print *, 'change the mus'
-   !    STOP
-   
-   ! endif
 
 !------------------------------------------------------------------------
 !     initial conditions
@@ -275,19 +295,12 @@ program ice
    
       if (IMEX .eq. 0) then
          if (rheo .eq. 2) then
-            call shear(un1)
             call ice_strength (hn1, An1) ! standard approach no IMEX 
-            call inertial_number()
-            call angle_friction_mu()
          else 
             call ice_strength (hn1, An1) 
          endif
       endif
-   !   do i  = 1, nx
-   !    print*, Pp_half(i)
-      ! print*, Pp(i)
-      ! print*, Inertial(i)
-      ! enddo
+
 !------- get wind forcing (independent of u) -----------------------------
 
      call wind_forcing (tauair, ts)
@@ -302,26 +315,32 @@ program ice
      
      do k = 1, Nmax_OL 
         
-        if (IMEX .gt. 0) then ! IMEX method 1 or 2
-         call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
+         if (IMEX .gt. 0) then ! IMEX method 1 or 2
+            call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
          ! call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
-               call shear(un1)
+            call shear(un1)
             call ice_strength (h, A) ! standard approach no IMEX 
             call inertial_number()
             call angle_friction_mu()
-        endif
-         ! do i = 0, nx+1
-         ! print*, 'u', u(i)
-         ! enddo
+         endif
+
+         ! if (rheo .eq. 2) then
+         !    call shear(u)
+         !    call inertial_number()
+         !    call angle_friction_mu()
+         ! endif
+
          call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-         ! call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
+         call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
          call calc_R (u, zeta, eta, Cw, Cb, tauair, R_uk1)
          call Fu (u, un1, un2, h, R_uk1, F_uk1) 
 
-            L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
-            
-            if (k .eq. 1) then
-         nl_target = gamma_nl*L2norm
+         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
+         ! print*, L2norm
+         
+         if (k .eq. 1) then
+            nl_target = gamma_nl*L2norm
+         ! nl_target = 1d-05
       !	  call output_ini_L2norm(ts,L2norm,expnb)
          endif
 
@@ -330,6 +349,7 @@ program ice
             if (solver .eq. 1) then
                print *, 'L2-norm after k ite=', ts, k-1, L2norm
                call bvect(tauair, un1, Cw, b)
+               ! call output_sor(ts,k,solver, expnb,b)
                call SOR (b, u, h, A, zeta, eta, Cw, Cb, p_flag, ts)
       !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
             elseif (solver .eq. 2) then
@@ -342,7 +362,15 @@ program ice
 
      enddo
      meanN = meanN + k-1
-!     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
+
+
+      if (output_diag) then 
+         call output_residual(ts,k,expnb,F_uk1)
+         call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
+         call output_ini_L2norm(ts,L2norm,expnb)
+      endif
+
+   !  call output_residual()
 
      elseif (solver .eq. 3 .or. solver .eq. 4) then ! explicit (EVP)
      

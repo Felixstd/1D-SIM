@@ -46,4 +46,5 @@ mathtext.fontset : dejavuserif
 
 # Use LaTeX for math formatting
 text.usetex : False
+text.latex.preamble : \usepackage{amsmath} \usepackage{amssymb}
 

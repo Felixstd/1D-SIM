@@ -95,7 +95,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
 !------------------------------------------------------------------------
      
 ! !     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uw(i) )
-     R_vec(i) = R_vec(i) !- a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
+     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
 !                                                                ! with NEMO
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag
@@ -118,15 +118,9 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
           (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 - &
           (zeta(i-1)+eta(i-1)) * (utp(i)-utp(i-1)) / Deltax2
      
-     ! if (rheo .eq. 2) then
-     !      R_vec(i) = R_vec(i) - 2*( Pp(i) - Pp(i-1) ) / Deltax
 
-     ! else 
-          R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
+     R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
      
-     ! endif
-
-     ! print*, 'r', R_vec(i)
      
   enddo
 

@@ -27,4 +27,5 @@ use size
   DOUBLE PRECISION :: shear_I(0:nx+1)
   DOUBLE PRECISION :: mu_I(0:nx+1)
   DOUBLE PRECISION :: Inertial(0:nx+1)
+  DOUBLE PRECISION :: W_sigma(0:nx+1)
 END MODULE global_var

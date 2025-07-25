@@ -44,7 +44,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
         hout(i) = max(hout(i), 0d0)
 
         flux=calc_flux(utp(i),utp(i+1),An1in(i-1),An1in(i), An1in(i+1)) ! for A
-        Aout(i) = An1in(i) - DtoverDx*flux
+        Aout(i) = An1in(i) !- DtoverDx*flux
         Aout(i) = max(Aout(i), 0d0)
         Aout(i) = min(Aout(i), 1d0)     
      
@@ -275,10 +275,10 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 
   endif
 
-  hout(1) = 0d0    ! closed b.c.s
-  hout(nx) = 0d0
-  Aout(1) = 0d0
-  Aout(nx) = 0d0
+!   hout(1) = 0d0    ! closed b.c.s
+!   hout(nx) = 0d0
+!   Aout(1) = 0d0
+!   Aout(nx) = 0d0
   
   return
 end subroutine advection

@@ -26,7 +26,8 @@ MODULE muphi
   DOUBLE PRECISION :: I_0
   DOUBLE PRECISION :: d_average
   DOUBLE PRECISION :: Phi_0
-  DOUBLE PRECISION :: mu_b
+  DOUBLE PRECISION :: mu_b, D
+  DOUBLE PRECISION :: n, eta_max
 
 
 END MODULE muphi

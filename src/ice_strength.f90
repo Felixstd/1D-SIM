@@ -25,9 +25,15 @@ subroutine ice_strength ( hin, Ain )
     enddo
   
   elseif ( rheo .eq. 2 ) then
+    
+    Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+    Pp_half(nx+1) = 0d0
+    Tp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+    Tp_half(nx+1) = 0d0
+
     do i = 1, nx
       Pp_half(i) = Pstar * hin(i) * dexp(-C * ( 1d0 - Ain(i) ))
-
+      Tp_half(i) = kt*Pp_half(i)
       ! Peq(i) = rho * hin(i) * (( d_average * shear_I(i) ) / ( Ain(i) - Phi_0 ))**2 
 
     enddo

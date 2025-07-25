@@ -75,31 +75,50 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   do i = 1, nx
 
-      if (nx .eq. 400) then
+      ! if (nx .eq. 400) then
 
+      if (nx .eq. 1000) then
+         A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+
+      else 
          if (initcond .eq. 'step') then
 
             A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-
-         elseif (initcond .eq. 'gaussian') then
-            A(i) = min(exp(-0.0001*(real(i) - real(nx)/2d0)**2d0), 1d0)
-         ! if (i < 10) then
-         !    A(i) = 0d0 
-         ! elseif (i > (nx-10)) then 
-         !    A(i) = 0d0 
-         ! else 
-         !    A(i) = 1d0
-         endif
+            if (A(i) .gt. 0d0) then  
+               h(i) = 1d0
+            endif
       
-      elseif (nx .eq. 1000) then
-         A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+         elseif (initcond .eq. 'gaussian') then
+            A(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
+            h(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
+
+         elseif (initcond .eq. 'supergaussian') then
+            A(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
+            h(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
+
+         elseif (initcond .eq. 'gaussianh') then
+            A(i) = 1d0
+            h(i) = min(0.1*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
+
+         elseif (initcond .eq. 'constantAsteph') then
+            A(i) = 1d0
+            h(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+
+         elseif (initcond .eq. 'constanthstepA') then
+            h(i) = 1d0
+            A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+
+         elseif (initcond .eq. 'constants') then 
+            A(i) = 1d0
+            h(i) = 1d0
+         
+
+
+         endif
+         
       endif
 
-      if (A(i) .gt. 0d0) then  
-         ! h(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-         h(i) = 1d0
-         ! h(i) = min(exp(-0.0001*(real(i) - real(nx))**2d0), 1d0)
-      endif
+
 
   enddo
 
@@ -107,13 +126,28 @@ subroutine ini_get (utp, restart, expres, ts_res)
 !     call random_number(rdnb)
 !     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess  
       ! if (i > nx/2) then
-      ! utp(i) = 0d0
+      ! utp(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)/10d0
+
+      utp(i) = 0d0
       ! else
-      if (h(i) > 0d0) then
-         utp(i) =  A(i)/100d0
-      else 
-         utp(i) = 0d0
-      endif
+!       if (initcond .eq. 'constants') then 
+
+!          utp(i) = 0.01
+
+!       elseif (initcond .eq. 'step') then 
+! ! 
+!          if (h(i) > 0d0) then
+!             ! utp(i) =  A(i)/100d0
+!             utp(i) =  i/1000d0
+!          else 
+!             utp(i) = 0d0
+!          endif
+      
+!       else 
+!          utp(i) = 0.01d0
+!       endif
+
+      ! utp(i) = 0d0
       
       uw(i)  = 0d0
   enddo
