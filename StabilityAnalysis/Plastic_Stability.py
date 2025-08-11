@@ -144,6 +144,8 @@ ax2.plot(k, np.imag(w_conv_GC_mub[0][0]), linestyle = '--', color = colors[1])
 ax2.plot(k, np.imag(w_div_GC_mub[1][0]), color = colors[2])
 ax2.plot(k, np.imag(w_conv_GC_mub[1][0]), linestyle = '--', color = colors[2])
 
+ax1.axhline((mu0/2 + 10 - 1)*Pstar/(h0*np.sqrt(Pstarstar*rhoice)*(dmean*deltamu/(2*I0))))
+
 for ax in [ax1, ax2]:
     ax.grid()
     ax.set_xscale('log')

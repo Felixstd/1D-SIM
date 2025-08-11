@@ -78,8 +78,9 @@ subroutine ini_get (utp, restart, expres, ts_res)
       ! if (nx .eq. 400) then
 
       if (nx .eq. 1000) then
-         A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-
+         ! A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+         h(i) = min(max(exp(-((real(i)-real(nx)/2d0)**2/6000)**5), 0d0), 1d0)
+         A(i) = 1
       else 
          if (initcond .eq. 'step') then
 
@@ -111,8 +112,6 @@ subroutine ini_get (utp, restart, expres, ts_res)
          elseif (initcond .eq. 'constants') then 
             A(i) = 1d0
             h(i) = 1d0
-         
-
 
          endif
          
@@ -128,7 +127,26 @@ subroutine ini_get (utp, restart, expres, ts_res)
       ! if (i > nx/2) then
       ! utp(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)/10d0
 
-      utp(i) = 0d0
+      ! utp(i) = 0d0
+
+      if (initcond_vel .eq. 'Gray') then 
+         ! if ((h(i) > 2d-1) .and. (i < 200)) then 
+         !    utp(i) = -i/2e3
+         ! elseif ((h(i) > 2d-1) .and. (i > 200)) then 
+         !    utp(i) = i/2e3
+         ! else
+         !    utp(i) = 0d0
+         ! endif 
+      
+         if (h(i) > 2d-1) then 
+            utp(i) = (i - nx/2d0)/5e2
+         
+         else 
+            utp(i) = 0
+         endif
+      elseif (initcond_vel .eq. 'zero') then 
+         utp(i) = 0d0
+      endif 
       ! else
 !       if (initcond .eq. 'constants') then 
 

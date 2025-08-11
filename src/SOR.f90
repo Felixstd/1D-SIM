@@ -81,14 +81,14 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
 	
-	B1 = B1 + scaling(i)*((zeta(i)+eta(i))    *utp(i+1) &
+	B1 = B1 + scaling(i)*((zeta(i)+eta(i))*utp(i+1) &
 		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
 
          ! if (D(i) .lt. 10d-10) then
          !    residual = 0d0
          ! else
-         ! print*, D(i)
-         residual = B1/D(i) - utp(i)
+         ! ! print*, D(i)
+          residual = B1/D(i) - utp(i)
          ! endif
         utp(i) = utp(i) + omega * residual
 

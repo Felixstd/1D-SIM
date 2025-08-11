@@ -51,7 +51,7 @@ for exp in Parameters.expno:
 	tstep, dates_time = (TimeUtility.read_time(Dates_Config, expno = exp))
 	# tstep = [int(1)]
 	# dates_time = [0, 1]
-	# tstep = [tstep[0]]
+	# tstep = tstep[:2]
 	# print(tstep)
 
 	if not os.path.isdir(Parameters.figdir+str(exp)):
@@ -59,6 +59,7 @@ for exp in Parameters.expno:
 	
 	if Parameters.read_all: 
 		#---------- READING DATA ----------#
+  
 		datadict = read_data.read_data(exp, 
 									int(Parameters.dt), 
 									int(Parameters.dx/1e3), 
@@ -67,7 +68,9 @@ for exp in Parameters.expno:
 									Parameters.adv, 
 									tstep, 
 									Parameters.outputdir, MuPhi = Parameters.muphi, Dissipation = Parameters.dissipation)
-  
+		if Parameters.dx < 1:
+			if Parameters.Nx == 1002:
+				Parameters.dx= 1
 		if Parameters.dissipation:
 			divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot = datadict.values()
 		else:

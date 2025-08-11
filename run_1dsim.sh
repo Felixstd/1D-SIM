@@ -4,7 +4,7 @@
 set -e
 
 # Define variables
-EXPNO="67"
+EXPNO="78"
 TARGET_DIR="Experiments/$EXPNO"
 SOURCE_FILE="./src/ice.f90"   # Change this to your source file name
 EXECUTABLE="zoupa"

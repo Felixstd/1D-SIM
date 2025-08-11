@@ -61,6 +61,7 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, MuPhi = False, D
         ]
         
         for prefix, key in files_info:
+           
             # filename = f"{outputdir}{prefix}{'_'}{dt:05}{'s_'}{dx:03}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:08}{'.'}{expno}"
             filename = f"{outputdir}{prefix}{'_'}{dt:05}{'s_'}{dx:06}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:08}{'.'}{expno:02d}"
             # filename = f"{outputdir}{prefix}{date}{('_k{:04d}'.format(k) + '.' + expno) if 'sig' in prefix or prefix in ['div', 'shear'] else '.' + expno}"

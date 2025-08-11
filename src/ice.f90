@@ -58,8 +58,8 @@ program ice
 !     Input by user
 !------------------------------------------------------------------------
    !---- I = 0.1 -----!
-  expnb      = 67
-  rheo           = 1
+  expnb      = 78
+  rheo           = 2
   linear_drag    = .false.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
@@ -67,9 +67,10 @@ program ice
   uwind          = 10d0   ! uwind velocity for constant_wind
   rep_closure    = .false. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
-  regularization = 'viscous' ! tanh, Kreyscher, capping (Hibler)
+  regularization = 'capping' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
   initcond       = 'constantAsteph'
+  initcond_vel   = 'zero'
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .false. ! for uwater mom eq.
   Asselin        = .false. ! Asselin filter for uw and etaw
@@ -77,15 +78,15 @@ program ice
   idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
-  solver     = 1     ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  solver     = 1    ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
   
-  T_tot      = 2*24*60*60
+  T_tot      = 10
 !   T_tot = 10000
 !   T_tot      = 60
 !   T_tot      = 3
-  Deltat     = 1! time step [s]
+  Deltat     = 1d-2! time step [s]
 !   nstep      = 1440     ! lenght of the run in nb of time steps
   nstep = T_tot/Deltat !lenght of the run in nb of time steps
    ! nstep = 1
@@ -173,8 +174,11 @@ program ice
      Deltax   =  20d03  ! grid size [m], the domain is always 2000 km 
   elseif  ( nx .eq. 200 ) then
      Deltax   =  1            
-  elseif  (( nx .eq. 400 ) .or. (nx .eq. 1000) .or. (nx .eq. 800)) then
+  elseif  (( nx .eq. 400 ) .or. (nx .eq. 800)) then
      Deltax   =  1d4
+
+   elseif (nx .eq. 1000) then 
+      Deltax = 1
    elseif  ( nx .eq. 500 ) then
      Deltax   =  4d03        
   else
@@ -202,6 +206,7 @@ program ice
 !   Cdairw     = 1.2d-03      ! air-water drag coeffient 
 !   Cdwater    = 5.5d-03  ! water-ice drag coeffient
   Cdwater    = 5.5d-30
+!   Cdwater    = 0d0
   Cdair      = 0d0    ! air-ice drag coeffient 
   Cdairw     = 0d0    ! air-water drag coeffient 
 !   Cdwater    = 0d0   ! water-ice drag coeffient
@@ -229,7 +234,7 @@ program ice
 
    ! mu_0       = 0.2d0
    ! mu_infty   = 0.8d0
-   mu_b       = 10d0
+   mu_b       = 1/2d0
    ! mu_b = 1d0
    I_0        = 1e-3
    
@@ -237,7 +242,7 @@ program ice
    c_phi      = 1
    D = 0.0001 !DEFAULT was -0.00001
    n = 2 !for super gaussian 
-   eta_max    = 0d0
+   eta_max    = 1d12
 
    output_diag = .false.
 

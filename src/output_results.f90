@@ -94,16 +94,16 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
  open (20, file = filename, status = 'unknown')
 
 
-  write(10,10) ( h(i),       i = 0, nx+1 )
-  write(11,10) ( A(i),       i = 0, nx+1 )
-  write(13,10) ( div(i),     i = 0, nx+1 )
+  write(10,*) ( h(i),       i = 0, nx+1 )
+  write(11,*) ( A(i),       i = 0, nx+1 )
+  write(13,*) ( div(i),     i = 0, nx+1 )
  write(14,*) ( zeta(i),    i = 0, nx+1 )
   write(15, *) (eta(i), i = 0, nx+1)
 !  write(15,10) ( sigma(i),   i = 0, nx+1 )
 !  write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
 !  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
-  write(12,10) ( utp(i),       i = 1, nx+1 )
-  write(18,10) ( Erate(i),     i = 1, nx+1 )
+  write(12,*) ( utp(i),       i = 1, nx+1 )
+  write(18,*) ( Erate(i),     i = 1, nx+1 )
   write(20,*) ( W_sigma(i),     i = 0, nx+1 )
 
   do k = 10, 20
@@ -155,7 +155,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   
   endif
   
-10 format (1x, 1000(f25.20, 1x))
+10 format (1x, 1000(f30.20, 1x))
 
   return
 end subroutine output_results

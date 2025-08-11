@@ -66,9 +66,8 @@ uice[-1, :] = 0
 
 #--- First step ---#
 uice[1:Nx, 1] = uice[1:Nx, 0] + 0.5 * C2 * (uice[:-2, 0] - 2*uice[1:Nx, 0] + uice[2:, 0])
-print(uice[:, 1])
 uice = solve_uice(Nt, Nx, uice)
-print(uice[:, 1000])
+
 
 idx = [ 0,  34560,  69120, 103680, 138240, 172800 ,207360 ,241920 ,276480, 311040]
 norm = colors.Normalize(vmin=0, vmax=idx[-1]/(60*60))  # assuming k ranges from 0 to 10
