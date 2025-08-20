@@ -34,7 +34,7 @@ program ice
   implicit none
 
   logical :: p_flag, restart, output_diag
-  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
+  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag, count
   integer :: out_step(11), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer :: time_out, n_output, output_time
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
@@ -46,6 +46,7 @@ program ice
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
+  double precision, allocatable :: h_time(:), A_time(:), utp_time(:)
 
   character filename*64
 
@@ -58,8 +59,8 @@ program ice
 !     Input by user
 !------------------------------------------------------------------------
    !---- I = 0.1 -----!
-  expnb      = 78
-  rheo           = 2
+  expnb      = 12
+  rheo           = 1
   linear_drag    = .false.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
@@ -69,8 +70,8 @@ program ice
   restart        = .false.
   regularization = 'capping' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
-  initcond       = 'constantAsteph'
-  initcond_vel   = 'zero'
+  initcond       = 'step'
+  initcond_vel   = 'Gray'
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .false. ! for uwater mom eq.
   Asselin        = .false. ! Asselin filter for uw and etaw
@@ -86,9 +87,12 @@ program ice
 !   T_tot = 10000
 !   T_tot      = 60
 !   T_tot      = 3
-  Deltat     = 1d-2! time step [s]
+  Deltat     = 1e-8! time step [s]
 !   nstep      = 1440     ! lenght of the run in nb of time steps
   nstep = T_tot/Deltat !lenght of the run in nb of time steps
+
+
+
    ! nstep = 1
    write (filename,'("output/time_run.",i2.2)') expnb
    open (10, file = filename, status = 'unknown')
@@ -106,7 +110,7 @@ program ice
 
    print*, out_step
 
-  Nmax_OL    = 500
+  Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
   N_sub = 900
@@ -158,6 +162,10 @@ program ice
   endif
   
   tsfin = tsini - 1 + nstep
+
+   allocate(h_time(tsfin))
+  allocate(A_time(tsfin))
+  allocate(utp_time(tsfin))
   
 !------------------------------------------------------------------------
 !     Define a flag for the precond (T) or solver (F)
@@ -176,6 +184,8 @@ program ice
      Deltax   =  1            
   elseif  (( nx .eq. 400 ) .or. (nx .eq. 800)) then
      Deltax   =  1d4
+  elseif  ( nx .eq. 500 ) then
+     Deltax   =  1
 
    elseif (nx .eq. 1000) then 
       Deltax = 1
@@ -261,12 +271,15 @@ program ice
   fgmres_per_ts = 0
 
 !   print*, u
-  
+  count = 1
   do ts = tsini, tsfin
      
      nbhr = nbhr + Deltat / 3600d0
      print *, 'time level, cumulative time (h) =', ts, nbhr
      
+     utp_time(count) = u(int(nx/2))
+     h_time(count)   = h(int(nx/2))
+     A_time(count)   = A(int(nx/2))
      
      call cpu_time(timecrap)
      call cpu_time(time1)
@@ -440,6 +453,7 @@ program ice
       call minmaxtracer(uw,5,ts)
       if (DiagStress) call output_diag_stress (ts, expnb, idiag)
      endif
+     count = count+1
 
   enddo
   
@@ -450,6 +464,8 @@ program ice
      print *, 'mean nb of fgmres it per time level: ', fgmres_per_ts/(nstep*1d0)
   endif
 
+!   call output_times(ts, expnb, solver, nstep, A_time, h_time, utp_time)
+  deallocate(A_time, h_time, utp_time) 
   deallocate(etaw, etawn1, etawn2, uw, uwn1, uwn2) 
   if (oceanSIM) then
    deallocate(duwdt, gedetawdx, tauiw, tauaw, buw) 

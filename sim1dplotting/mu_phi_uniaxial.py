@@ -70,7 +70,9 @@ for exp in Parameters.expno:
 									Parameters.outputdir, MuPhi = Parameters.muphi, Dissipation = Parameters.dissipation)
 		if Parameters.dx < 1:
 			if Parameters.Nx == 1002:
-				Parameters.dx= 1
+				Parameters.dx = 1
+			if Parameters.Nx == 502:
+				Parameters.dx = 1
 		if Parameters.dissipation:
 			divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot = datadict.values()
 		else:

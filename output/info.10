@@ -10,9 +10,9 @@
  DEFINITION OF THE RUN
  
  dx (m) =
-        10000.0000000000
- dt (s) =
             1.0000000000
+ dt (s) =
+            0.0000000100
  linear water drag =
  F
  linear viscous =

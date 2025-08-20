@@ -10,11 +10,11 @@
  DEFINITION OF THE RUN
  
  dx (m) =
-        10000.0000000000
+            2.0000000000
  dt (s) =
-            1.0000000000
+            0.0100000000
  linear water drag =
- T
+ F
  linear viscous =
  F
  constant wind =

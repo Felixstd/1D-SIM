@@ -3,113 +3,133 @@
 !****************************************************************************
 
 subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
-  use size
-  use resolution
-  use properties
-  use global_var
-  use numerical
-  use option
+    use size
+    use resolution
+    use properties
+    use global_var
+    use numerical
+    use option
 
-  implicit none
-      
-  integer :: i, l
-  integer, intent(in) :: ts
-  logical, intent(in) :: p_flag ! T: precond, F: standard solver
-  double precision, intent(inout) :: utp(1:nx+1) !in: ini guess, out: answer
-  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1)
-  double precision, intent(in)  :: htp(0:nx+1), Atp(0:nx+1)
-  double precision, intent(in)  :: b(1:nx+1)
-  double precision              :: D(1:nx+1)
+    implicit none
+        
+    integer :: i, l
+    integer, intent(in) :: ts
+    logical, intent(in) :: p_flag ! T: precond, F: standard solver
+    double precision, intent(inout) :: utp(1:nx+1) !in: ini guess, out: answer
+    double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
+    double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1)
+    double precision, intent(in)  :: htp(0:nx+1), Atp(0:nx+1)
+    double precision, intent(in)  :: b(1:nx+1)
+    double precision              :: D(1:nx+1)
 
-  double precision :: h_at_u, a_at_u, B1, residual ,maxerror
+    double precision :: h_at_u, a_at_u, B1, residual ,maxerror
 
-  if (p_flag) then
-     utp = 0d0              ! initial guess for precond
-     maxiteSOR = iteSOR_pre ! nb of ite for precond
-  endif
+    if (p_flag) then
+        utp = 0d0              ! initial guess for precond
+        maxiteSOR = iteSOR_pre ! nb of ite for precond
+    endif
 
-  do i = 2, nx ! D(i) does not change during the SOR iterations
+    do i = 2, nx ! D(i) does not change during the SOR iterations
 
 !------------------------------------------------------------------------
 !    rhoice*h*du/dt : tendency term, advection of momentum is neglected
 !------------------------------------------------------------------------
 
-     h_at_u = ( htp(i) + htp(i-1) ) / 2d0
-     
-     if ( BDF2 .eq. 0 ) then
-      D(i) = ( rho * h_at_u ) / Deltat 
-     elseif ( BDF2 .eq. 1 ) then 
-      D(i) = ( 3d0 * rho * h_at_u ) / ( 2d0*Deltat )
-     endif
+        h_at_u = ( htp(i) + htp(i-1) ) / 2d0
+
+        if ( BDF2 .eq. 0 ) then
+        D(i) = ( rho * h_at_u ) / Deltat 
+        elseif ( BDF2 .eq. 1 ) then 
+        D(i) = ( 3d0 * rho * h_at_u ) / ( 2d0*Deltat )
+        endif
+
+!------------------------------------------------------------------------
+!     rhoice*h*u*du/dx : advection term, can't neglect because of the high 
+!     resolution used. Uses of an upwind scheme. 
+! 
+   ! if (utp(i) > 0) then
+   !    D(i)  = D(i) + rho * h_at_u *(utp(i) - utp(i-1))/Deltax
+   ! elseif (utp(i) < 0) then
+   !    D(i)  = D(i) + rho * h_at_u *(utp(i+1) - utp(i))/Deltax
+   ! endif
+
+        ! D(i) = D(i) + rho/(2*Deltax2) *(htp(i-1)*utp(i) - htp(i)*utp(i+1))
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
 
-      a_at_u = ( Atp(i) + Atp(i-1) ) / 2d0
-      a_at_u=max(a_at_u, smallA)
-      D(i) = D(i) + a_at_u*Cw(i)
+        a_at_u = ( Atp(i) + Atp(i-1) ) / 2d0
+        a_at_u=max(a_at_u, smallA)
+        D(i) = D(i) + a_at_u*Cw(i)
 
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag term
 !------------------------------------------------------------------------
 
-      D(i) = D(i)! + Cb(i)      
+        D(i) = D(i)! + Cb(i)      
       
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
      
-      D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
-      D(i)=scaling(i)*D(i) ! for JFNK
-      ! print*,'D',  D(i)
-  enddo
+        D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
+        D(i)=scaling(i)*D(i) ! for JFNK
+        ! print*,'D',  D(i)
+    enddo
 
-  do l = 1, maxiteSOR
-     maxerror = 0d0
+    do l = 1, maxiteSOR
+        maxerror = 0d0
 
-     do i = 2, nx
+        do i = 2, nx
         
 !------------------------------------------------------------------------
 !     b : forcing term
 !------------------------------------------------------------------------
         
-        B1 = b(i)
+            B1 = b(i)
 
 !------------------------------------------------------------------------
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
 	
-	B1 = B1 + scaling(i)*((zeta(i)+eta(i))*utp(i+1) &
-		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
+            B1 = B1 + scaling(i)*((zeta(i)+eta(i))*utp(i+1) &
+                    +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
+
+!------------------------------------------------------------------------
+!     advection of momentum
+!------------------------------------------------------------------------   
+
+            ! B1 = B1 + rho/(2*Deltax2)*( h(i-1)*utp(i) - htp(i)*utp(i+1))
+
 
          ! if (D(i) .lt. 10d-10) then
          !    residual = 0d0
          ! else
          ! ! print*, D(i)
-          residual = B1/D(i) - utp(i)
+            residual = B1/D(i) - utp(i)
          ! endif
-        utp(i) = utp(i) + omega * residual
+            utp(i) = utp(i) + omega * residual
 
-        if (.not. p_flag) then
-           if ( abs( residual ) .gt. maxerror ) then
-              maxerror = abs( residual )
-           endif
-        endif
+            if (.not. p_flag) then
+                if ( abs( residual ) .gt. maxerror ) then
+                    maxerror = abs( residual )
+                endif
+            endif
 
-     enddo
+        enddo   
      
-     if (.not. p_flag) then
-        if ( maxerror .lt. tol_SOR ) then
-        print *, 'nb of SOR ite=', l
-        exit
+        if (.not. p_flag) then
+            if ( maxerror .lt. tol_SOR ) then
+                print *, 'nb of SOR ite=', l
+                exit
+            endif
         endif
-     endif
     
-  enddo
+    enddo   
 
-  return
+    return
+    
 end subroutine SOR
 
 !****************************************************************************

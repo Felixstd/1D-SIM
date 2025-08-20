@@ -80,7 +80,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
       if (nx .eq. 1000) then
          ! A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
          h(i) = min(max(exp(-((real(i)-real(nx)/2d0)**2/6000)**5), 0d0), 1d0)
-         A(i) = 1
+         A(i) = h(i)
       else 
          if (initcond .eq. 'step') then
 
@@ -138,7 +138,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
          !    utp(i) = 0d0
          ! endif 
       
-         if (h(i) > 2d-1) then 
+         if (h(i) > 0d0) then 
             utp(i) = (i - nx/2d0)/5e2
          
          else 

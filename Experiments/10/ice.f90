@@ -15,10 +15,7 @@
 !       version: 1.0 (20 april 2012)
 !
 !************************************************************************
-!---- uice init is 0 -----!
-!----- Removed the step in advection -----!
-!----- WITH WATER DRAG ------!
-!----- capping in VP is 1d8 ------!
+!------ no advection for A -------!
 
 program ice
 
@@ -37,7 +34,7 @@ program ice
   implicit none
 
   logical :: p_flag, restart, output_diag
-  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
+  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag, count
   integer :: out_step(11), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer :: time_out, n_output, output_time
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
@@ -49,6 +46,7 @@ program ice
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
+  double precision, allocatable :: h_time(:), A_time(:), utp_time(:)
 
   character filename*64
 
@@ -72,7 +70,8 @@ program ice
   restart        = .false.
   regularization = 'capping' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
-  initcond       = 'step'
+  initcond       = 'constantAsteph'
+  initcond_vel   = 'Gray'
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .false. ! for uwater mom eq.
   Asselin        = .false. ! Asselin filter for uw and etaw
@@ -80,17 +79,20 @@ program ice
   idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
-  solver     = 1     ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  solver     = 1    ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
   
-  T_tot      = 4*24*60*60
+  T_tot      = 10
 !   T_tot = 10000
 !   T_tot      = 60
 !   T_tot      = 3
-  Deltat     = 1! time step [s]
+  Deltat     = 1e-8! time step [s]
 !   nstep      = 1440     ! lenght of the run in nb of time steps
   nstep = T_tot/Deltat !lenght of the run in nb of time steps
+
+
+
    ! nstep = 1
    write (filename,'("output/time_run.",i2.2)') expnb
    open (10, file = filename, status = 'unknown')
@@ -160,6 +162,10 @@ program ice
   endif
   
   tsfin = tsini - 1 + nstep
+
+   allocate(h_time(tsfin))
+  allocate(A_time(tsfin))
+  allocate(utp_time(tsfin))
   
 !------------------------------------------------------------------------
 !     Define a flag for the precond (T) or solver (F)
@@ -175,9 +181,14 @@ program ice
   if ( nx .eq. 100 ) then 
      Deltax   =  20d03  ! grid size [m], the domain is always 2000 km 
   elseif  ( nx .eq. 200 ) then
-     Deltax   =  10d03            
-  elseif  (( nx .eq. 400 ) .or. (nx .eq. 1000)) then
-     Deltax   =  10d03
+     Deltax   =  1            
+  elseif  (( nx .eq. 400 ) .or. (nx .eq. 800)) then
+     Deltax   =  1d4
+  elseif  ( nx .eq. 500 ) then
+     Deltax   =  1
+
+   elseif (nx .eq. 1000) then 
+      Deltax = 1
    elseif  ( nx .eq. 500 ) then
      Deltax   =  4d03        
   else
@@ -203,7 +214,9 @@ program ice
 
 !   Cdair      = 1.2d-03      ! air-ice drag coeffient 
 !   Cdairw     = 1.2d-03      ! air-water drag coeffient 
-  Cdwater    = 5.5d-03  ! water-ice drag coeffient
+!   Cdwater    = 5.5d-03  ! water-ice drag coeffient
+  Cdwater    = 5.5d-30
+!   Cdwater    = 0d0
   Cdair      = 0d0    ! air-ice drag coeffient 
   Cdairw     = 0d0    ! air-water drag coeffient 
 !   Cdwater    = 0d0   ! water-ice drag coeffient
@@ -222,25 +235,24 @@ program ice
    !Just like VP
    ! mu_0       = (-4d0+sqrt(20d0))/2d0
    ! mu_infty   = (-4d0+sqrt(20d0))/2d0
-   mu_0       = 1d0/(2d0*alpha)
-   mu_infty   = 1d0/(2d0*alpha)
-
-   ! mu_0 = 0.2
-   ! mu_infty = 0.8
-   ! mu_b = 1/2d0
-   ! print*, mu_0, alpha
+   ! mu_0       = 1d0/(2d0*alpha)
+   mu_0       = 0.2
+   mu_infty   = 0.8
    ! mu_b       = 1d0/(alpha)
+   ! print*, mu_0, alpha
+   
 
-   ! mu_0       = 0.2
-   ! mu_infty   = 0.8
-   ! mu_b       = 1/2d0
+   ! mu_0       = 0.2d0
+   ! mu_infty   = 0.8d0
+   mu_b       = 1/2d0
+   ! mu_b = 1d0
    I_0        = 1e-3
    
    Phi_0      = 1
    c_phi      = 1
    D = 0.0001 !DEFAULT was -0.00001
    n = 2 !for super gaussian 
-   eta_max    = 1d8
+   eta_max    = 1d12
 
    output_diag = .false.
 
@@ -259,12 +271,15 @@ program ice
   fgmres_per_ts = 0
 
 !   print*, u
-  
+  count = 1
   do ts = tsini, tsfin
      
      nbhr = nbhr + Deltat / 3600d0
      print *, 'time level, cumulative time (h) =', ts, nbhr
      
+     utp_time(count) = u(int(nx/2))
+     h_time(count)   = h(int(nx/2))
+     A_time(count)   = A(int(nx/2))
      
      call cpu_time(timecrap)
      call cpu_time(time1)
@@ -392,6 +407,9 @@ program ice
 
      if (IMEX .eq. 0) call advection (un1, u, hn1, An1, hn2, An2, h, A)
 
+
+     if (rheo .eq. 2) call energydissipation(u, zeta, eta, P_half)
+
 !     call meantracer(h,meanvalue)
 
 !------------------------------------------------------------------------
@@ -435,6 +453,7 @@ program ice
       call minmaxtracer(uw,5,ts)
       if (DiagStress) call output_diag_stress (ts, expnb, idiag)
      endif
+     count = count+1
 
   enddo
   
@@ -445,6 +464,8 @@ program ice
      print *, 'mean nb of fgmres it per time level: ', fgmres_per_ts/(nstep*1d0)
   endif
 
+!   call output_times(ts, expnb, solver, nstep, A_time, h_time, utp_time)
+  deallocate(A_time, h_time, utp_time) 
   deallocate(etaw, etawn1, etawn2, uw, uwn1, uwn2) 
   if (oceanSIM) then
    deallocate(duwdt, gedetawdx, tauiw, tauaw, buw) 

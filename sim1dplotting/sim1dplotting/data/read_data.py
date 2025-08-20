@@ -114,7 +114,30 @@ def read_maxvelocities(namefile):
     return max_velocities, min_velocities, tstep
 
 
-
+def read_time(expno, dt, dx, solv, IMEX, adv, dates, outputdir):
     
+    
+
+
+    data_dict = {'h_time': [],
+                'A_time':  [],
+                'h_time':  []
+                
+                }
+    
+    
+    files_info = ('h_time',
+                'A_time',
+                'h_time')
+
+
+        
+    for key in files_info:
+        
+        # filename = f"{outputdir}{prefix}{'_'}{dt:05}{'s_'}{dx:03}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:08}{'.'}{expno}"
+        filename = f"{outputdir}{key}{'_'}{dt:05}{'s_'}{dx:06}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:08}{'.'}{expno:02d}"
+        # filename = f"{outputdir}{prefix}{date}{('_k{:04d}'.format(k) + '.' + expno) if 'sig' in prefix or prefix in ['div', 'shear'] else '.' + expno}"
+        # print(filename)
+        data_dict[key].append(np.loadtxt(filename, dtype=None))
     
     

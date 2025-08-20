@@ -384,3 +384,57 @@ subroutine output_diag_stress(ts, expnb, idiag)
 
   return
 end subroutine output_diag_stress
+
+
+subroutine output_times(ts, expnb, solver, nstep, A_time, h_time, u_time)
+
+  use size
+  use resolution
+  use global_var
+  use shallow_water
+  use MOMeqSW_output
+  use rheology
+  use option
+
+  implicit none
+
+  character filename*90
+
+  integer :: i, k, Dt, Dx, adv
+  integer, intent(in) :: ts, expnb, solver, nstep
+  double precision, intent(in) :: A_time(:), h_time(:), u_time(:)
+
+
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+ elseif (adv_scheme .eq. 'semilag') then
+    adv = 3
+  endif
+
+  Dt=int(Deltat) ! in s
+  Dx=int(Deltax/1000d0) ! in km
+
+    
+  write (filename, '("output/h_time_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+        Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+  open (10, file = filename, status = 'unknown')
+
+  write (filename, '("output/A_time_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+		    Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+  open (11, file = filename, status = 'unknown')
+
+    write (filename, '("output/u_time_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+		    Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+  open (12, file = filename, status = 'unknown')
+
+  write(10,*) ( A_time(i),       i = 1, nstep+1 )
+  write(11,*) ( h_time(i),       i = 1, nstep+1 )
+  write(12,*) ( u_time(i),       i = 1, nstep+1 )
+
+  close(10)
+  close(11)
+  close(12)
+
+end subroutine output_times
