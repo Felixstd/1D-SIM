@@ -59,7 +59,7 @@ program ice
 !     Input by user
 !------------------------------------------------------------------------
    !---- I = 0.1 -----!
-  expnb      = 12
+  expnb      = 54
   rheo           = 1
   linear_drag    = .false.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
@@ -70,8 +70,9 @@ program ice
   restart        = .false.
   regularization = 'capping' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
-  initcond       = 'step'
-  initcond_vel   = 'Gray'
+  initcond       = 'stepsmooth'
+  initcond_vel   = 'Graysmooth'
+  advection_mom  = .false.
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .false. ! for uwater mom eq.
   Asselin        = .false. ! Asselin filter for uw and etaw
@@ -83,11 +84,11 @@ program ice
   IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
   
-  T_tot      = 10
-!   T_tot = 10000
+!   T_tot      = 1000
+  T_tot = 3000
 !   T_tot      = 60
 !   T_tot      = 3
-  Deltat     = 1e-8! time step [s]
+  Deltat     = 0.001! time step [s]
 !   nstep      = 1440     ! lenght of the run in nb of time steps
   nstep = T_tot/Deltat !lenght of the run in nb of time steps
 
@@ -110,7 +111,7 @@ program ice
 
    print*, out_step
 
-  Nmax_OL    = 200
+  Nmax_OL    = 500
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
   N_sub = 900
@@ -178,19 +179,21 @@ program ice
 !     Define Deltax and check CFL based on input by user
 !------------------------------------------------------------------------
 
-  if ( nx .eq. 100 ) then 
+   if ( nx .eq. 100 ) then 
      Deltax   =  20d03  ! grid size [m], the domain is always 2000 km 
-  elseif  ( nx .eq. 200 ) then
+   elseif  ( nx .eq. 200 ) then
      Deltax   =  1            
-  elseif  (( nx .eq. 400 ) .or. (nx .eq. 800)) then
-     Deltax   =  1d4
-  elseif  ( nx .eq. 500 ) then
-     Deltax   =  1
-
-   elseif (nx .eq. 1000) then 
-      Deltax = 1
    elseif  ( nx .eq. 500 ) then
-     Deltax   =  4d03        
+     Deltax   =  1000
+   elseif  ( nx .eq. 625 ) then
+     Deltax   =  800
+   elseif  ( nx .eq. 800 ) then
+     Deltax   =  625
+   elseif  ( nx .eq. 1000 ) then
+     Deltax   =  500
+   elseif  ( nx .eq. 2000 ) then
+     Deltax   =  250
+
   else
      print *,  'Wrong grid size dimension', nx
      STOP
@@ -214,8 +217,8 @@ program ice
 
 !   Cdair      = 1.2d-03      ! air-ice drag coeffient 
 !   Cdairw     = 1.2d-03      ! air-water drag coeffient 
-!   Cdwater    = 5.5d-03  ! water-ice drag coeffient
-  Cdwater    = 5.5d-30
+  Cdwater    = 5.5d-03  ! water-ice drag coeffient
+!   Cdwater    = 5.5d-30
 !   Cdwater    = 0d0
   Cdair      = 0d0    ! air-ice drag coeffient 
   Cdairw     = 0d0    ! air-water drag coeffient 
@@ -244,7 +247,7 @@ program ice
 
    ! mu_0       = 0.2d0
    ! mu_infty   = 0.8d0
-   mu_b       = 1/2d0
+   mu_b       = 10d0
    ! mu_b = 1d0
    I_0        = 1e-3
    
@@ -252,7 +255,7 @@ program ice
    c_phi      = 1
    D = 0.0001 !DEFAULT was -0.00001
    n = 2 !for super gaussian 
-   eta_max    = 1d12
+   eta_max    = 1d9
 
    output_diag = .false.
 

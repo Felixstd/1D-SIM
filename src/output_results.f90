@@ -49,27 +49,27 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
    Erate(i) = utp(i) * ( sigma(i) - sigma(i-1) ) / Deltax
   enddo
   
-  write (filename, '("output/h_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/h_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 		    Dx,solver,IMEX, adv,BDF2,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/A_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/u_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/div_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (13, file = filename, status = 'unknown')
 
- write (filename, '("output/zeta_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+ write (filename, '("output/zeta_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
  open (14, file = filename, status = 'unknown')
 
-  write (filename, '("output/eta_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') Dt, &
+  write (filename, '("output/eta_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
  open (15, file = filename, status = 'unknown')
 
@@ -89,7 +89,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (18, file = filename, status = 'unknown')
 
-  write (filename, '("output/Wdissip_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+  write (filename, '("output/Wdissip_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
       Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
  open (20, file = filename, status = 'unknown')
 

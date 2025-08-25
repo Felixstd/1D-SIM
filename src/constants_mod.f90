@@ -36,6 +36,7 @@ MODULE properties
 
   IMPLICIT NONE
   DOUBLE PRECISION :: rho, rhowater, ge
+  LOGICAL :: advection_mom
 
 END MODULE properties
 
@@ -51,7 +52,7 @@ MODULE resolution
   IMPLICIT NONE
   DOUBLE PRECISION :: Deltax, Deltax2
   DOUBLE PRECISION :: Deltat, DtoverDx, Deltate
-  INTEGER :: T_tot
+  DOUBLE PRECISION :: T_tot
 
 END MODULE resolution
 

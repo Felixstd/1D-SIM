@@ -53,7 +53,9 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
    !    D(i)  = D(i) + rho * h_at_u *(utp(i+1) - utp(i))/Deltax
    ! endif
 
-        ! D(i) = D(i) + rho/(2*Deltax2) *(htp(i-1)*utp(i) - htp(i)*utp(i+1))
+        ! D(i) = D(i) + (rho/(2*Deltax))*(h_at_u)
+        
+        ! rho/(2*Deltax) *(htp(i-1)*utp(i) - htp(i)*utp(i+1))
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
@@ -99,9 +101,9 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !------------------------------------------------------------------------
 !     advection of momentum
 !------------------------------------------------------------------------   
-
-            ! B1 = B1 + rho/(2*Deltax2)*( h(i-1)*utp(i) - htp(i)*utp(i+1))
-
+            if (advection_mom) then
+                B1 = B1 + (rho/(2*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
+            endif
 
          ! if (D(i) .lt. 10d-10) then
          !    residual = 0d0

@@ -20,11 +20,12 @@ subroutine ini_get (utp, restart, expres, ts_res)
   integer, intent(in) :: expres, ts_res
   integer :: i
   double precision, intent(inout)  :: utp(1:nx+1)
-  double precision :: rdnb, small
+  double precision :: rdnb, small, ramp, eps, window
 
   character(LEN=30) filename  ! restart file name 
 
   small = 0.0001d0
+  eps = 0.1  !controls sharpness of the transition
 
   allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
   allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
@@ -77,45 +78,49 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
       ! if (nx .eq. 400) then
 
-      if (nx .eq. 1000) then
-         ! A(i) = min(max((real(40000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-         h(i) = min(max(exp(-((real(i)-real(nx)/2d0)**2/6000)**5), 0d0), 1d0)
-         A(i) = h(i)
-      else 
-         if (initcond .eq. 'step') then
-
-            A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-            if (A(i) .gt. 0d0) then  
-               h(i) = 1d0
-            endif
-      
-         elseif (initcond .eq. 'gaussian') then
-            A(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
-            h(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
-
-         elseif (initcond .eq. 'supergaussian') then
-            A(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
-            h(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
-
-         elseif (initcond .eq. 'gaussianh') then
-            A(i) = 1d0
-            h(i) = min(0.1*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
-
-         elseif (initcond .eq. 'constantAsteph') then
-            A(i) = 1d0
-            h(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-
-         elseif (initcond .eq. 'constanthstepA') then
+      if (initcond .eq. 'step') then
+         A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+         ! A(i) = min(max((real(600000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+         if (A(i) .gt. 0d0) then  
             h(i) = 1d0
-            A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-
-         elseif (initcond .eq. 'constants') then 
-            A(i) = 1d0
-            h(i) = 1d0
-
          endif
-         
+
+      elseif (initcond .eq. 'stepsmooth') then
+         ! if (nx .eq. 500) then
+            A(i) = min(max(tanh((real(i)-real(nx)/3)/0.0000001**(-0.1)) &
+                     - tanh((real(i)-2*real(nx)/3)/0.0000001**(-0.1)), 0d0)/2, 1d0)
+            if (A(i) .gt. 0d0) then  
+               h(i) = A(i)
+            endif
+
+      
+      elseif (initcond .eq. 'gaussian') then
+         A(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
+         h(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
+
+      elseif (initcond .eq. 'supergaussian') then
+         A(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
+         h(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
+
+      elseif (initcond .eq. 'gaussianh') then
+         A(i) = 1d0
+         h(i) = min(0.1*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
+
+      elseif (initcond .eq. 'constantAsteph') then
+         A(i) = 1d0
+         h(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+
+      elseif (initcond .eq. 'constanthstepA') then
+         h(i) = 1d0
+         A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
+
+      elseif (initcond .eq. 'constants') then 
+         A(i) = 1d0
+         h(i) = 1d0
+
       endif
+         
+      ! endif
 
 
 
@@ -130,20 +135,21 @@ subroutine ini_get (utp, restart, expres, ts_res)
       ! utp(i) = 0d0
 
       if (initcond_vel .eq. 'Gray') then 
-         ! if ((h(i) > 2d-1) .and. (i < 200)) then 
-         !    utp(i) = -i/2e3
-         ! elseif ((h(i) > 2d-1) .and. (i > 200)) then 
-         !    utp(i) = i/2e3
-         ! else
-         !    utp(i) = 0d0
-         ! endif 
       
          if (h(i) > 0d0) then 
-            utp(i) = (i - nx/2d0)/5e2
+            utp(i) = (i - nx/2d0)/1e5
          
          else 
             utp(i) = 0
          endif
+
+      elseif (initcond_vel .eq. 'Graysmooth') then
+         ramp = (i - nx/2d0) / 1e2
+         
+         window = 1 / (1 + exp((abs(ramp) - 0.8)/eps))
+         utp(i) = ramp*window/1000
+
+
       elseif (initcond_vel .eq. 'zero') then 
          utp(i) = 0d0
       endif 
