@@ -6,6 +6,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   use MOMeqSW_output
   use rheology
   use option
+
   implicit none
 
   character filename*90
@@ -93,6 +94,32 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
       Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
  open (20, file = filename, status = 'unknown')
 
+ if (mechenergy) then
+  write (filename, '("output/Ppot_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (21, file = filename, status = 'unknown')
+  
+  write (filename, '("output/Pfric_R_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (22, file = filename, status = 'unknown')
+
+  write (filename, '("output/Pfric_s_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (23, file = filename, status = 'unknown')
+
+  write (filename, '("output/Plat_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (24, file = filename, status = 'unknown')
+
+  write (filename, '("output/Ph_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (25, file = filename, status = 'unknown')
+  
+  write (filename, '("output/Pw_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') &
+      Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (26, file = filename, status = 'unknown')
+  endif
+
 
   write(10,*) ( h(i),       i = 0, nx+1 )
   write(11,*) ( A(i),       i = 0, nx+1 )
@@ -106,9 +133,24 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   write(18,*) ( Erate(i),     i = 1, nx+1 )
   write(20,*) ( W_sigma(i),     i = 0, nx+1 )
 
+  if (mechenergy) then
+    write(21,*) ( P_pot(i),       i = 1, nx+1 )
+    write(22,*) ( P_fric_R(i),     i = 1, nx+1 )
+    write(23,*) ( P_fric_S(i),     i = 1, nx+1 )
+    write(24,*) ( P_lat(i),     i = 1, nx+1 )
+    write(25,*) ( P_h(i),     i = 1, nx+1 )
+    write(26,*) ( P_w(i),     i = 1, nx+1 )
+  endif
+
   do k = 10, 20
      close(k)
   enddo
+
+  if (mechenergy) then 
+    do k = 21, 26 
+      close(k)
+    enddo
+  endif
 
   if (oceanSIM) then
   
@@ -438,3 +480,99 @@ subroutine output_times(ts, expnb, solver, nstep, A_time, h_time, u_time)
   close(12)
 
 end subroutine output_times
+
+
+subroutine output_mech_energy(P_pot_Tavg, P_fric_R_Tavg, P_fric_S_Tavg, &
+                              P_fric_R_visc_Tavg, P_fric_S_visc_Tavg, P_fric_R_plas_Tavg,&
+                             P_fric_S_plas_Tavg, P_lat_Tavg, P_h_Tavg, P_w_Tavg, &
+                             ts, expnb, solver, nstep)
+    
+    use size
+    use resolution
+    use global_var
+    use rheology
+    use option
+
+    implicit none 
+    character filename*90
+
+    integer :: i, k, Dt, Dx, adv, tstep
+    integer, intent(in) :: ts, expnb, solver, nstep
+    double precision, intent(in) :: P_pot_Tavg(nstep), P_fric_R_Tavg(nstep), P_fric_S_Tavg(nstep)
+    double precision, intent(in) :: P_fric_R_visc_Tavg(nstep), P_fric_S_visc_Tavg(nstep)
+    double precision, intent(in) :: P_fric_R_plas_Tavg(nstep), P_fric_S_plas_Tavg(nstep)
+    double precision, intent(in) :: P_lat_Tavg(nstep), P_h_Tavg(nstep), P_w_Tavg(nstep)
+
+
+    if (adv_scheme .eq. 'upwind') then
+        adv = 1
+    elseif (adv_scheme .eq. 'upwindRK2') then
+        adv = 2
+    elseif (adv_scheme .eq. 'semilag') then
+        adv = 3
+    endif
+
+    Dt=int(Deltat) ! in s
+    Dx=int(Deltax/1000d0) ! in km
+    
+
+        
+    write (filename, '("output/Pp_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+            Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (10, file = filename, status = 'unknown')
+
+    write (filename, '("output/PfR_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (11, file = filename, status = 'unknown')
+
+    write (filename, '("output/PfS_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (12, file = filename, status = 'unknown')
+
+    write (filename, '("output/Pl_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+            Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (13, file = filename, status = 'unknown')
+
+    write (filename, '("output/Ph_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (14, file = filename, status = 'unknown')
+
+    write (filename, '("output/Pw_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (15, file = filename, status = 'unknown')
+
+    write (filename, '("output/PfRp_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (16, file = filename, status = 'unknown')
+
+    write (filename, '("output/PfSp_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (17, file = filename, status = 'unknown')
+
+    write (filename, '("output/PfRv_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (18, file = filename, status = 'unknown')
+
+    write (filename, '("output/PfSv_t_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i8.8,".",i2.2)') &
+                Dt, Dx,solver,IMEX, adv,BDF2,ts,expnb
+    open (19, file = filename, status = 'unknown')
+
+
+    write(10,*) ( P_pot_Tavg(i),      i = 1, nstep )
+    write(11,*) ( P_fric_R_Tavg(i),   i = 1, nstep)
+    write(12,*) ( P_fric_S_Tavg(i),   i = 1, nstep )
+    write(13,*) ( P_lat_Tavg(i),      i = 1, nstep )
+    write(14,*) ( P_h_Tavg(i),        i = 1, nstep)
+    write(15,*) ( P_w_Tavg(i),        i = 1, nstep )
+    write(16,*) ( P_fric_R_plas_Tavg(i),        i = 1, nstep )
+    write(17,*) ( P_fric_S_plas_Tavg(i),        i = 1, nstep )
+    write(18,*) ( P_fric_R_visc_Tavg(i),        i = 1, nstep )
+    write(19,*) ( P_fric_S_visc_Tavg(i),        i = 1, nstep )
+
+
+    do i = 10, 19
+        close(i)
+    enddo
+
+
+end subroutine

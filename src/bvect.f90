@@ -25,9 +25,6 @@ subroutine bvect(tauair, un1, Cw, b)
      b(i) = a_at_u*tauair(i) + a_at_u*Cw(i)*uwn2(i) - &
             ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat - &
             rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
-      ! print*, 'b' , - ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat 
-
-    !  b(i) =  - ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat 
   
 
   enddo

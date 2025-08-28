@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
@@ -109,7 +110,7 @@ k = np.linspace(1e-7, 1e0, int(1e7))
 zeta_max_0 = 1e12
 # omega_plus_0, omega_minus_0, argument0 = omega_viscous_dhdx(k, 0, 1e12)
 
-
+#%%
 fig = plt.figure(figsize = (5, 4))
 for i, zeta_max_e in enumerate(zeta_max_e_tot):
     zeta_max = zeta_max_tot[i]
@@ -131,7 +132,7 @@ plt.title(r'$\partial h_0 / \partial x = 0$, $e = {}$'.format(e))
 plt.savefig('omega_vp_e{}_dhdx0.png'.format(e))
 
 # fig , (ax1, ax2, ax3) = plt.subplots(3, 1, figsize = (6, 4))
-
+#%%
 
 dx = 1e4
 
@@ -141,10 +142,11 @@ u0 = 0.1
 du0dx =u0/dx
 
 
-fig = plt.figure(figsize = (8, 4))
-ax = plt.axes()
+# fig = plt.figure(figsize = (8, 4))
+# ax = plt.axes()
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (7, 5), sharex = True)  
+fig2, (ax3) = plt.subplots(1, 1, figsize = (8, 4), sharex = True)  
 zeta_max_tot = np.array([1.25e8, 1.25e9, 1.25e12])
 colors = ['darkred', 'forestgreen', 'royalblue']
 
@@ -154,25 +156,25 @@ colors = mpl.colormaps['Set1'].colors
 labels = []
 for i, zeta_max in enumerate(zeta_max_tot):
     
-    omega_plus_dhdx_dadx, omega_minus_dhdx_dadx, omega_dudx, max_omega =  omega_viscous_dhdx_dAdx(k, dh0dx, 0, 0, 0, zeta_max)
-    omega_plus_dhdx, omega_minus_dhdx, max_omega =  omega_viscous_dhdx(k, dh0dx, du0dx, u0, zeta_max)
-    omega_plus_dhdx_negdu0dx, omega_minus_dhdx_negdu0dx, max_omega_negdu0dx =  omega_viscous_dhdx(k, dh0dx, -du0dx, u0, zeta_max)
+    # omega_plus_dhdx_dadx, omega_minus_dhdx_dadx, omega_dudx, max_omega =  omega_viscous_dhdx_dAdx(k, dh0dx, 0, 0, 0, zeta_max)
+    # omega_plus_dhdx, omega_minus_dhdx, max_omega =  omega_viscous_dhdx(k, dh0dx, du0dx, u0, zeta_max)
+    # omega_plus_dhdx_negdu0dx, omega_minus_dhdx_negdu0dx, max_omega_negdu0dx =  omega_viscous_dhdx(k, dh0dx, -du0dx, u0, zeta_max)
     omega_plus_constant, omega_minus_constant, max_omega = omega_viscous_constant(k, zeta_max)
     
-    print(omega_minus_dhdx_dadx)
-    print(omega_viscous_dhdx_dAdx(1e9, dh0dx, dA0dx, du0dx, u0, zeta_max))
     mantissa, exponent = f"{zeta_max:.2e}".split('e')
     label = r"$\nu_{{max}} = {} \times 10^{{{}}}$ Nsm$^{{-1}}$".format(mantissa, int(exponent))
     # p = ax.plot(k, omega_minus_dhdx, color = colors[i], label = label)
     p = ax1.plot(k, omega_plus_constant, color = colors[i], label = label)
     p = ax2.plot(k, np.imag(omega_plus_constant), color = colors[i])
+    
+    P = ax3.plot(k, omega_plus_constant, color = colors[i], label = label, linewidth = 2)
     # p = ax3.plot(k, omega_plus_constant, color = colors[i])
     
     # p = ax.plot(k, omega_minus_dhdx_negdu0dx, color = colors[i], linestyle = '--', label = label)
     # ax.plot(k, omega_minus_dhdx, color ='b', linestyle = '--', label = label)
     labels.append(mlines.Line2D([], [], color = p[0].get_color(), marker='None', linestyle='None',
                             label=label))
-    ax.axhline(max_omega)
+    # ax.axhline(max_omega)
     
 for ax in [ax1, ax2]:
     
@@ -182,19 +184,25 @@ for ax in [ax1, ax2]:
     
 ax1.set_ylabel(r'$\text{Re}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
 ax2.set_ylabel(r'$\text{Im}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
+ax3.set_ylabel(r'$\text{Re}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
 # ax3.set_ylabel(r'$\text{Im}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
 fig.supxlabel(r'$k$ (m$^{-1}$)', fontsize = 15)
 fig.align_ylabels()
 fig.legend(loc='upper center', 
                 handles=labels, labelcolor='linecolor',  bbox_to_anchor=(1.07, 0.9), fontsize = 15)
+
+ax3.set_xscale('log')
+fig2.supxlabel(r'$k$ (m$^{-1}$)', fontsize = 15)
+fig2.legend(loc='lower right', 
+                handles=labels, labelcolor='linecolor',  bbox_to_anchor=(0.9, 0.12), fontsize = 15)
 # ax.set_title(r'$du_0/dx = {} \; \text{{s}}^{{-1}}, dh_0/dx = {}, dA_0/dx = {} \; \text{{m}}^{{-1}}$'.format(du0dx, dh0dx, dA0dx))
 # ax.set_title(r'$du_0/dx = {} \; \text{{s}}^{{-1}}, dh_0/dx = {}$'.format(du0dx, dh0dx))
 fig.savefig('omega_viscous_constant_plus.png')
-
+fig2.savefig('omega_viscous_constant_plus_real.png')
 
 omega_minus_zeta_min_max = []
 
-
+#%%
 #------ Plastic ---------#
 
 omega_min = omega_plastic_VP(k, u0, h0, 2)

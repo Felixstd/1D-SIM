@@ -47,65 +47,83 @@ maxvel_exp = []
 for exp in Parameters.expno: 
 	print('Reading Experiment', exp)
 	Dates_Config = TimeUtility(configuration_time = config_exp['Time'], 
-                           configuration_fig  = config_exp['Figures'])
+							  configuration_fig  = config_exp['Figures'])
 	tstep, dates_time = (TimeUtility.read_time(Dates_Config, expno = exp))
-	# tstep = [int(1)]
-	# dates_time = [0, 1]
-	# tstep = tstep[:2]
-	# print(tstep)
+
+
 
 	if not os.path.isdir(Parameters.figdir+str(exp)):
 		os.mkdir(Parameters.figdir+str(exp))
 	
 	if Parameters.read_all: 
 		#---------- READING DATA ----------#
-  
-		datadict = read_data.read_data(exp, 
-									int(Parameters.dt), 
-									int(Parameters.dx/1e3), 
-									Parameters.solv, 
-									Parameters.imex, 
-									Parameters.adv, 
-									tstep, 
-									Parameters.outputdir, MuPhi = Parameters.muphi, Dissipation = Parameters.dissipation)
+
+		if Parameters.mechanical_energy:
+			datadict, datadict_energy = read_data.read_data(
+				exp, 
+				int(Parameters.dt_read), 
+				int(Parameters.dx/1e3), 
+				Parameters.solv, 
+				Parameters.imex, 
+				Parameters.adv, 
+				tstep, 
+				Parameters.outputdir, 
+				Dissipation=Parameters.dissipation, 
+				Energy=Parameters.mechanical_energy
+			)
+
+			datadict_energy_Tavg = read_data.read_avg_energy(
+       			exp, 
+          		int(Parameters.dt_read), 
+            	int(Parameters.dx/1e3), 
+             	Parameters.solv, 
+              	Parameters.imex, 
+               	Parameters.adv, 
+                Parameters.nstep, 
+                Parameters.outputdir)
+			number_viscous, number_plastic = read_data.read_visc_plas_file('num_visc_plas_{}.out'.format(exp))
+
+		else:
+			datadict = read_data.read_data(
+				exp, 
+				int(Parameters.dt_read), 
+				int(Parameters.dx/1e3), 
+				Parameters.solv, 
+				Parameters.imex, 
+				Parameters.adv, 
+				tstep, 
+				Parameters.outputdir, 
+				Dissipation=Parameters.dissipation
+			)
+
 		if Parameters.dx < 1:
+			if Parameters.Nx == 627:
+				Parameters.dx = 800
+			if Parameters.Nx == 802:
+				Parameters.dx = 625
 			if Parameters.Nx == 1002:
-				Parameters.dx = 1
-			if Parameters.Nx == 502:
-				Parameters.dx = 1
+				Parameters.dx = 500
+			if Parameters.Nx == 2002:
+				Parameters.dx = 250
+	
 		if Parameters.dissipation:
 			divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot = datadict.values()
 		else:
 			divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot = datadict.values()
-   
-		#----- Initial Conditions ------#
-		A_init = A_tot[0]
-		h_init = h_tot[0]
-		u_init = u_tot[0]
-		X = np.arange(0, Parameters.Nx)*Parameters.dx/1e3
-		plt.figure()
-		ax1 = plt.axes()
-		ax2 = ax1.twinx()
-		# ax1.plot(X[1:-1], A_init[1:-1], color = 'k')
-		ax1.plot(X[1:-1], h_init[1:-1], color = 'k')
-		ax1.set_ylabel(r'$h$ (m)',color = 'k' )
-		ax1.set_xlabel(r'x (m)',color = 'k' )
-		ax2.plot(X[1:-1], u_init[:-1], linestyle = '--', color = 'b')
-		ax2.set_ylabel(r'$u$ (m/s)', color='b')
-		ax2.tick_params(axis='y', labelcolor='b')
-		plt.savefig('init_conditions.png')
+		
+		plot.plot_initial_conditions(A_tot, h_tot, u_tot, Parameters, Parameters.figdir+str(exp)+'/', exp)
 
-	if Parameters.savevar:
-		datadict_saved = datadict.copy()
-		datadict_saved['timestep'] = int(Parameters.dt)
-		datadict_saved['resolution'] = int(Parameters.dx/1e3)
-		datadict_saved['dates'] = dates_time
-		np.save('SavedExperiments/datadict_exp_{}.npy'.format(exp), datadict_saved)
+		if Parameters.savevar:
+			datadict_saved = datadict.copy()
+			datadict_saved['timestep'] = int(Parameters.dt)
+			datadict_saved['resolution'] = int(Parameters.dx/1e3)
+			datadict_saved['dates'] = dates_time
+			np.save('SavedExperiments/datadict_exp_{}.npy'.format(exp), datadict_saved)
 # X = np.linspace(0, nx*dx, nx)
 
 # 
 	if Parameters.plotfields:
-   
+		
 		plot.plot_variable(Parameters.dx, 
 							Parameters.dt,
 							tstep, 
@@ -130,27 +148,38 @@ for exp in Parameters.expno:
 
 #---------- Plotting ----------#
 	if Parameters.plotsingle:
-		plot.plot_individual_time(tstep, 
-                            		exp, 
-                              		datadict, 
-                                	Parameters.dx,
-									Parameters.figdir+str(exp)+'/', 
-         							0, 
-                					0,
-                     				MuPhi = Parameters.muphi,
-                         			Dissipation = Parameters.dissipation)
-  
+    
+		# plot.plot_individual_time(tstep, 
+        #                     		exp, 
+        #                       		datadict, 
+        #                         	Parameters.dx,
+        #                          	Parameters.dt,
+		# 							Parameters.figdir+str(exp)+'/', 
+        #  							0, 
+        #         					0,
+        #              				MuPhi = Parameters.muphi,
+        #                  			Dissipation = Parameters.dissipation)
+
+		if Parameters.mechanical_energy:
+			plot.plot_mechanical_energy(
+                            tstep, 
+                            datadict_energy, 
+                            Parameters, 
+                            Parameters.figdir+str(exp)+'/', 
+                            exp
+                            )
+			plot.plot_energy(datadict_energy_Tavg,number_plastic, number_viscous, Parameters, Parameters.figdir+str(exp)+'/')
+			
+
    
-	if Parameters.maxvelocities:
-     
-	
-		file = "/aos/home/fstdenis/1D-SIM/output_post_files/min_max_vel_{}.out".format(exp)
-		max_velocities, min_velocities, tstep = read_data.read_maxvelocities(file)
-		print(len(max_velocities))
-		maxvel_exp.append(max_velocities)
    
-		
- 
+   
+		if Parameters.maxvelocities:
+			file = "/aos/home/fstdenis/1D-SIM/output_post_files/min_max_vel_{}.out".format(exp)
+			max_velocities, min_velocities, tstep = read_data.read_maxvelocities(file)
+			print(len(max_velocities))
+			maxvel_exp.append(max_velocities)
+
 if Parameters.maxvelocities:
 	plot.plot_velocities(maxvel_exp, Parameters.maxcapping, [mpl.colormaps['Set1'].colors[2],mpl.colormaps['Set1'].colors[0]] , Parameters.dt, tstep, exp, './', 'viscous')
 
@@ -166,7 +195,7 @@ datadict_highcapping = np.load('/aos/home/fstdenis/1D-SIM/sim1dplotting/SavedExp
 divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot, _, _, _ = datadict_lowcapping.values()
 dx = datadict_lowcapping['resolution']
 dates = datadict_lowcapping['dates']
-print(dates)
+# print(dates)
 Nx = np.shape(divergence_tot)[1]
 X = np.arange(0, Nx)*dx
 

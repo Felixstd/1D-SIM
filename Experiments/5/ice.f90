@@ -83,11 +83,11 @@ program ice
   IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
   
-  T_tot      = 100
+  T_tot      = 10000
 !   T_tot = 10000
 !   T_tot      = 60
 !   T_tot      = 3
-  Deltat     = 1e-2! time step [s]
+  Deltat     = 1d-2! time step [s]
 !   nstep      = 1440     ! lenght of the run in nb of time steps
   nstep = T_tot/Deltat !lenght of the run in nb of time steps
 

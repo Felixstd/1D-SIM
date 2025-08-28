@@ -15,6 +15,7 @@ class namelist:
         self.plotsingle = int(configuration_exp['plot_single'])
         self.plotresidual = int(configuration_exp['residual_analysis'])
         self.dissipation = int(configuration_exp['energy_dissipation'])
+        self.mechanical_energy = int(configuration_exp['mech_energy'])
         self.maxvelocities = int(configuration_exp['maxvelocities'])
 
         
@@ -36,6 +37,8 @@ class namelist:
         
         #------ Time -------#
         self.dt = float(configuration_time['dt'])
+        self.dt_read = float(configuration_time['dt_read'])
         self.startk = int(configuration_time['start_k'])
+        self.nstep = int(configuration_time['nstep'])
         
         

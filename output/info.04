@@ -12,7 +12,7 @@
  dx (m) =
         10000.0000000000
  dt (s) =
-            0.0099999998
+            0.0100000000
  linear water drag =
  F
  linear viscous =

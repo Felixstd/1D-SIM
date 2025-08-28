@@ -1,6 +1,6 @@
 import numpy as np
 
-Nx = 1001
+Nx =1001
 L = 1000
 dx = L/(Nx-1)
 # dx = 1
@@ -12,7 +12,7 @@ x = np.arange(0, Nx, 1)
 # print(np.shape(x))
 dt = 1e-4
 numax = 1e12
-Nt = 300
+Nt = 1000000
 Nt_saves = 10
 
 flux_Gray = True
@@ -52,10 +52,12 @@ time = np.arange(0, int(Nt), 1)
 
 A0 = np.exp(-((x-Nx/2)**2/6000)**5)   # Gaussian bump
 h0 = A0
-A_time = np.ones_like(A0)
+# A_time = np.ones_like(A0)
 # A0 = np.exp(-((x-Nx/2)**2/1000)**5)   # Gaussian bump
 # u0 = np.linspace(-3, 3, Nx)
-# u0[A0 < 0.2] =0
+u0 = np.zeros_like(A0)
+u0[A0>0] = (x[A0>0]-Nx/2)
+u0[A0 < 1e-10] =0
 u0 = np.zeros_like(A0)
 
 

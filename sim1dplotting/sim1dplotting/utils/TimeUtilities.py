@@ -5,7 +5,7 @@ class TimeUtility:
     def __init__(self, configuration_time = None, 
                  configuration_fig = None):
         
-        self.dt           = int(configuration_time['dt'])
+        self.dt           = float(configuration_time['dt'])
         self.outputdir     = str(configuration_fig['outputdir'])
         
         

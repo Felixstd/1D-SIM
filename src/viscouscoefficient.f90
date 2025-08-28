@@ -28,6 +28,7 @@ subroutine viscouscoefficient(utp, zeta, eta)
 		do i = 1, nx
 			dudx = ( utp(i+1) - utp(i) ) / Deltax
 			shearmax = sqrt( (dudx)**2d0+small2) 
+			! shearmax = sqrt
 			! shearmax  = abs(dudx) + small2
 
 			Inertial_num = min(d_average * shearmax * SQRT(rho * h(i)/(Pp_half(i)+Tp_half(i))), 1d0)

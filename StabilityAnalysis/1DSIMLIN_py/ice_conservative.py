@@ -365,15 +365,15 @@ def step(U, dx, dt, psi_profile, sigma_11, C):
     return U_new
 
 
-# @jit(nopython = True)
+@jit(nopython = True)
 def solve_ice(U, dt, dx, Nx, Nt, Nt_saves, CFL = False):
     
     # time_save = np.linspace(0, Nt*dt, Nt_saves)#, dtype=np.float32)
     time_tot = np.linspace(0, Nt*dt, Nt)#, dtype=np.float32)
-    idx_save = np.linspace(0, Nt - 1, 10, dtype = int)
+    idx_save = np.linspace(0, Nt - 1, 10)
+    idx_save = idx_save.astype(np.uint64)   
     time_save = time_tot[idx_save]
-    print(time_save)
-    print(time_tot)
+
     U_saves = np.zeros((2, Nx, len(time_save)))
     id_saved =0
    
@@ -409,13 +409,13 @@ def solve_ice(U, dt, dx, Nx, Nt, Nt_saves, CFL = False):
             CFL = dt* lamb/dx
             
             CFL_adv = ((np.sqrt(1+e**(-2))-1)/2 * Pstar/rhoice)**(1/2) * dt/dx
-            print(CFL, CFL_adv)
+            # print(CFL, CFL_adv)
 
         # Unew = step(U, dx, dt, psi_profile,  C)
         Unew = step(U, dx, dt, psi_profile, sigma_11, C)
         U = Unew
 
-        if np.any(np.isclose(time, time_save, atol=1e-5)):
+        if np.isin(t, idx_save):#np.any(np.isclose(time, time_save, atol=1e-12)):
         # print('here')
             print('Saving State: ', t+1)
             U_saves[:,:, id_saved] = U

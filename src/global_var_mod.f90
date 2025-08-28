@@ -28,4 +28,19 @@ use size
   DOUBLE PRECISION :: mu_I(0:nx+1)
   DOUBLE PRECISION :: Inertial(0:nx+1)
   DOUBLE PRECISION :: W_sigma(0:nx+1)
+
+
+  ! Energy 
+  DOUBLE PRECISION :: P_pot(0:nx+1)
+  DOUBLE PRECISION :: P_fric_R(0:nx+1)
+  DOUBLE PRECISION :: P_fric_S(0:nx+1)
+  DOUBLE PRECISION :: P_fric_R_visc(0:nx+1)
+  DOUBLE PRECISION :: P_fric_S_visc(0:nx+1)
+  DOUBLE PRECISION :: P_fric_R_plas(0:nx+1)
+  DOUBLE PRECISION :: P_fric_S_plas(0:nx+1)
+  DOUBLE PRECISION :: P_lat(0:nx+1)
+  DOUBLE PRECISION :: P_h(0:nx+1)
+  DOUBLE PRECISION :: P_w(0:nx+1)
+
+
 END MODULE global_var
