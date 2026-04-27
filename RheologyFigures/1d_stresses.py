@@ -10,7 +10,8 @@ muinf = 0.8
 delta_mu = muinf-mu0
 dmean = 1000
 rhoice = 900
-
+psi_d = 1/2*((1+e**(-2))**(1/2)-1)
+psi_c = 1/2*(-(1+e**(-2))**(1/2)-1)
 
 def VP_rheology(dudx, dudx_c = 1e-8):
     
@@ -68,13 +69,31 @@ plt.plot(dudx, sigma_11_VP, label = 'VP', color = 'r')
 # plt.plot(dudx, sigma_11_GC, label = 'GC', color = 'b')
 plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 plt.yticks(positions, labels, fontsize = 9)
-plt.text(4e-8, 0.1, r'$\frac{\sqrt{1.25}-1}{2}$')
-plt.text(-0.8e-6, -1,r'$\frac{-\sqrt{1.25}-1}{2}$')
-ax.yaxis.set_label_coords(0.3,0.92)
+# plt.text(4e-8, 0.1, r'$\frac{\sqrt{1.25}-1}{2}$')
+# plt.text(-0.8e-6, -1,r'$\frac{-\sqrt{1.25}-1}{2}$')
+ax.yaxis.set_label_coords(0.3,0.95)
 # ax.spines['bottom'].set_position('center')
+ax.fill_betweenx(
+    [psi_c, psi_d],
+    -1e-8, 1e-8,
+    color='lightskyblue', alpha=0.3, 
+    edgecolor = None
+)
+ax.fill_betweenx(
+    [psi_c, psi_d],
+    -1e-8, -1e-6,
+    color='lightgreen', alpha=0.3, 
+    edgecolor = None
+)
+ax.fill_betweenx(
+    [psi_c, psi_d],
+    1e-8, 1e-6,
+    color='lightgreen', alpha=0.3, 
+    edgecolor = None
+)
 ax.spines['left'].set_position('center')
 plt.xscale('symlog', linthresh = 1e-8)
 # plt.xscale('log')
 plt.xlabel(r'$\frac{\partial{u}}{\partial{x}}$',fontsize=12)
-plt.ylabel(r'$\sigma_{11}/P^*$', rotation=0, fontsize=12, ha='left')
+plt.ylabel(r'Stress', rotation=0, fontsize=12, ha='left')
 plt.savefig('sigma_11.png')
