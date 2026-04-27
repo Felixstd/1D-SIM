@@ -13,6 +13,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
   use MOMeqSW_output
   use option
   use muphi
+  use resolution
 
   implicit none
      
@@ -20,12 +21,13 @@ subroutine ini_get (utp, restart, expres, ts_res)
   integer, intent(in) :: expres, ts_res
   integer :: i
   double precision, intent(inout)  :: utp(1:nx+1)
-  double precision :: rdnb, small, ramp, eps, window
+  double precision :: rdnb, small, ramp, eps, window, x, L
+  double precision :: x1, x2, c1, c2, b1, b2, par1, par2, w, g
 
   character(LEN=30) filename  ! restart file name 
 
   small = 0.0001d0
-  eps = 0.1  !controls sharpness of the transition
+  eps = 100 !controls sharpness of the transition
 
   allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
   allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
@@ -77,8 +79,14 @@ subroutine ini_get (utp, restart, expres, ts_res)
   do i = 1, nx
 
       ! if (nx .eq. 400) then
+      if ((initcond_vel .eq. 'GraysmoothConv') .and. (initcond .eq. 'stepsmooth')) then 
+         A(i) = min(max(tanh((real(i)-real(nx)/3)/0.0000001**(-0.1)) &
+                     - tanh((real(i)-2*real(nx)/3)/0.0000001**(-0.1)), 0d0)/5, 1d0)
+            if (A(i) .gt. 0d0) then  
+               h(i) = A(i)
+            endif
 
-      if (initcond .eq. 'step') then
+      elseif (initcond .eq. 'step') then
          A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
          ! A(i) = min(max((real(600000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
          if (A(i) .gt. 0d0) then  
@@ -118,7 +126,10 @@ subroutine ini_get (utp, restart, expres, ts_res)
          A(i) = 1d0
          h(i) = 1d0
 
+
       endif
+
+      
          
       ! endif
 
@@ -144,10 +155,60 @@ subroutine ini_get (utp, restart, expres, ts_res)
          endif
 
       elseif (initcond_vel .eq. 'Graysmooth') then
-         ramp = (i - nx/2d0) / 1e2
+         ! ramp = (i - nx/2d0) / 1e2
          
-         window = 1 / (1 + exp((abs(ramp) - 0.8)/eps))
-         utp(i) = ramp*window/1000
+         ! window = 1 / (1 + exp((abs(ramp) - 0.8)/eps))
+         ! utp(i) = ramp*window/1000
+
+         L = nx* Deltax
+         x = (i-1) * Deltax
+         ramp = (x - L/2) / 1e2
+         window = 1 / (1 + exp((abs(ramp) - 800)/eps))
+         utp(i) = ramp*window/1000000
+      
+      elseif (initcond_vel .eq. 'GraysmoothConv') then
+         
+         
+         ! if (nx .eq. 1000) then  
+         !    ramp = -(i - nx/2d0)
+         !    window = 1 / (1 + exp((abs(ramp) - nx/6d0)/2d0))
+         !    utp(i) = ramp*window/1d4
+         L = nx* Deltax
+         x = (i-1) * Deltax
+         ramp = - (x - L/2) / 1e2
+         window = 1 / (1 + exp((abs(ramp) - 800)/eps))
+         utp(i) = ramp*window/10000
+         ! else 
+            ! ramp = -(i - nx/2d0)/ 1e2
+            ! window = 1 / (1 + exp((abs(ramp) - 1)/eps))
+            ! utp(i) = ramp*window/10
+         ! endif
+      
+      elseif (initcond_vel .eq. 'parabolaConv') then 
+         w = 10d0
+         g = 100d0
+         c1 = nx/2d0 - g/2d0
+         c2 = nx/2d0 + g/2d0
+
+         x1 = (i - c1)/w
+         x2 = (i - c2)/w
+         if (abs(x1) < 1) then
+            b1 = exp(-1d0/(1-x1**2d0))
+         else
+            b1 = 0
+         endif
+
+         if (abs(x2) < 1) then
+            b2 = exp(-1d0/(1-x2**2d0))
+         else
+            b2 = 0
+         endif
+
+
+         par1 = -(1d0-((i - c1)/w)**2d0)*b1/w
+         par2 = (1d0-((i - c2)/w)**2d0)*b2/w
+
+         utp(i) = par1 + par2+0.001
 
 
       elseif (initcond_vel .eq. 'zero') then 

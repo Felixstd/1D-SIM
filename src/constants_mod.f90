@@ -6,7 +6,7 @@ MODULE rheology
 ! kt: for tensile strength, T = kt x P
   IMPLICIT NONE
   DOUBLE PRECISION :: C, Pstar, alpha, alpha2, kt
-  DOUBLE PRECISION :: e_2, small2
+  DOUBLE PRECISION :: e_2, small2, denomin_P
 
 END MODULE rheology
 
@@ -27,7 +27,7 @@ MODULE muphi
   DOUBLE PRECISION :: d_average
   DOUBLE PRECISION :: Phi_0
   DOUBLE PRECISION :: mu_b, D
-  DOUBLE PRECISION :: n, eta_max
+  DOUBLE PRECISION :: n, eta_max, zeta_max
 
 
 END MODULE muphi

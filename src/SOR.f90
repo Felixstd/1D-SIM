@@ -2,7 +2,7 @@
 !     solves Au=b with the SOR method or Pdu=rhs (as a precond)
 !****************************************************************************
 
-subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
+subroutine SOR (b, utp, un1, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
     use size
     use resolution
     use properties
@@ -19,7 +19,7 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
     double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
     double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1)
     double precision, intent(in)  :: htp(0:nx+1), Atp(0:nx+1)
-    double precision, intent(in)  :: b(1:nx+1)
+    double precision, intent(in)  :: b(1:nx+1), un1(1:nx+1)
     double precision              :: D(1:nx+1)
 
     double precision :: h_at_u, a_at_u, B1, residual ,maxerror
@@ -51,9 +51,10 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
    !    D(i)  = D(i) + rho * h_at_u *(utp(i) - utp(i-1))/Deltax
    ! elseif (utp(i) < 0) then
    !    D(i)  = D(i) + rho * h_at_u *(utp(i+1) - utp(i))/Deltax
-   ! endif
-
-        ! D(i) = D(i) + (rho/(2*Deltax))*(h_at_u)
+!    ! endif
+        ! if (advection_mom) then
+        !     D(i) = D(i) + (rho/(2*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))
+        ! endif
         
         ! rho/(2*Deltax) *(htp(i-1)*utp(i) - htp(i)*utp(i+1))
 
@@ -84,7 +85,8 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
         maxerror = 0d0
 
         do i = 2, nx
-        
+
+            h_at_u = ( htp(i) + htp(i-1) ) / 2d0
 !------------------------------------------------------------------------
 !     b : forcing term
 !------------------------------------------------------------------------
@@ -102,7 +104,8 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !     advection of momentum
 !------------------------------------------------------------------------   
             if (advection_mom) then
-                B1 = B1 + (rho/(2*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
+                ! B1 = B1 + (rho/(2*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
+                B1 = B1 - (rho/(2*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*un1(i)
             endif
 
          ! if (D(i) .lt. 10d-10) then

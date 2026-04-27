@@ -1,3 +1,14 @@
-output/
 
+output/*
+output_old/*
 
+Experiments/*
+Experiments_old/*
+
+sim1dplotting/outputs_VP/*
+
+sim1dplotting/Num_Visc_Plas/*
+
+sim1dplotting/SavedExperiments/*
+
+output_Stab_VP_GC_1/*

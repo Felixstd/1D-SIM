@@ -1,11 +1,11 @@
 [Experiment]
-expno      = 69
-savevar     = 0
+expno      = 17
+savevar     = 1
 plot_fields = 0
 read_all    = 1
 plot_single = 1
 residual_analysis = 0
-energy_dissipation = 0
+energy_dissipation = 1
 maxvelocities = 0
 mech_energy = 1
 
@@ -16,7 +16,7 @@ dt       = 0.1
 nstep    = 300000
 
 [Rheology]
-muphi = 0
+GC = 0
 mub   = 1
 mu0 = 0.1
 muinf = 0.8

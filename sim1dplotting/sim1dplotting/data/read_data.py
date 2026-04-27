@@ -19,7 +19,7 @@ def load_data(data_dict, files_info, date, expno, dt, dx, solv, IMEX, adv,output
         # return data_dict
 
 
-def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = False, Energy = False):
+def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = False, Energy = False, GC = False):
     """
     This function reads the ouput, for the specified dates and experiment number (expno) from the McGIll-SIM and puts
     them in a dictionnary. 
@@ -43,6 +43,8 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = Fa
         'h_dates': [],
         'A_dates': [],
         'u_dates':[],
+        'sigma_dates':[], 
+        'signorm_dates':[], 
         # 'b_dates':[], 
         'eta_dates':[], 
         'zeta_dates':[]
@@ -66,6 +68,13 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = Fa
             'Ppot_dates':   []     
 
         }
+        
+    if GC: 
+        data_dict_base.update({
+            'P_dates':[],
+            'muI_dates':[]
+        }
+        )
     
     for k, date in enumerate(dates, start=1):
         # List of file prefixes and associated keys
@@ -76,6 +85,8 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = Fa
             ('h', 'h_dates'),
             ('A', 'A_dates'),
             ('u', 'u_dates'),
+            ('sig', 'sigma_dates'),
+            ('sigN', 'signorm_dates'),
             # ('b', 'b_dates'), 
             ('zeta', 'zeta_dates'), 
             ('eta', 'eta_dates')
@@ -88,6 +99,11 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = Fa
             for prefix, key in [('Wdissip', 'Wsigma_dates')]:
                 filename = f"{outputdir}{prefix}{'_'}{dt:05}{'s_'}{dx:06}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:09}{'.'}{expno:02d}"
                 data_dict_base[key].append(np.loadtxt(filename, dtype=None))
+                
+        if GC:
+            files_info = [('P', 'P_dates'), 
+                          ('Mu', 'muI_dates')]
+            load_data(data_dict_base, files_info, date, expno, dt, dx, solv, IMEX, adv, outputdir)
         
 
         if Energy:
@@ -157,6 +173,8 @@ def read_avg_energy(expno, dt, dx, solv, IMEX, adv, date, outputdir):
             'Pfric_R_visc_Tavg':[], 
             'Pfric_S_plas_Tavg':[],
             'Pfric_R_plas_Tavg':[], 
+            'P_fric_R_pZ_vE_Tavg':[], 
+            'P_fric_R_vZ_pE_Tavg':[],
             'Ph_Tavg':     [],
             'Pw_Tavg':     [], 
             'Ppot_Tavg':   []     
@@ -165,12 +183,14 @@ def read_avg_energy(expno, dt, dx, solv, IMEX, adv, date, outputdir):
     
     files_energy = [
             ( 'Pl_t', 'Plat_Tavg'), 
-            ('PfR_t', 'Pfric_S_Tavg'),
-            ('PfS_t', 'Pfric_R_Tavg'), 
-            ('PfRv_t', 'Pfric_S_visc_Tavg'),
-            ('PfSv_t', 'Pfric_R_visc_Tavg'), 
-            ('PfRp_t', 'Pfric_S_plas_Tavg'),
-            ('PfSp_t', 'Pfric_R_plas_Tavg'), 
+            ('PfR_t', 'Pfric_R_Tavg'),
+            ('PfS_t', 'Pfric_S_Tavg'), 
+            ('PfRv_t', 'Pfric_R_visc_Tavg'),
+            ('PfSv_t', 'Pfric_S_visc_Tavg'), 
+            ('PfRp_t', 'Pfric_R_plas_Tavg'),
+            ('PfSp_t', 'Pfric_S_plas_Tavg'), 
+            ('PfRvzpe_t', 'P_fric_R_vZ_pE_Tavg'), 
+            ('PfRpzve_t', 'P_fric_R_pZ_vE_Tavg'), 
             ('Ph_t', 'Ph_Tavg'),
             ('Pw_t',   'Pw_Tavg'), 
             ('Pp_t', 'Ppot_Tavg')]
@@ -190,8 +210,8 @@ def read_visc_plas_file(namefile):
             # Find all numbers
             numbers = re.findall(r"\d+", line)
             if len(numbers) >= 2:
-                viscous.append(int(numbers[0]))
-                plastic.append(int(numbers[1]))
+                plastic.append(int(numbers[0]))
+                viscous.append(int(numbers[1]))
     
     return np.asarray(viscous), np.asarray(plastic)
     

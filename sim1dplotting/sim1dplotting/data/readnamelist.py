@@ -20,7 +20,7 @@ class namelist:
 
         
         #------ Rheology ------#
-        self.muphi      = int(configuration_rheo['muphi'])
+        self.GC      = int(configuration_rheo['GC'])
         self.mu0        = float(configuration_rheo['mu0'])
         self.muinf      = float(configuration_rheo['muinf'])
         self.mub        = [float(x) for x in configuration_rheo['mub'].split(',')]

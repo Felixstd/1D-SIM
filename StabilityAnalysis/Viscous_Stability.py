@@ -105,7 +105,7 @@ dh0dx_arr = np.concatenate([np.array([0.0]), dh0dx_arr])
 dA0dx_arr = dh0dx_arr
 print(len(dA0dx_arr))
 
-k = np.linspace(1e-7, 1e0, int(1e7))
+k = np.linspace(1e-6, 1e0, int(1e7))
 
 zeta_max_0 = 1e12
 # omega_plus_0, omega_minus_0, argument0 = omega_viscous_dhdx(k, 0, 1e12)
@@ -146,7 +146,7 @@ du0dx =u0/dx
 # ax = plt.axes()
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (7, 5), sharex = True)  
-fig2, (ax3) = plt.subplots(1, 1, figsize = (8, 4), sharex = True)  
+fig2, (ax3) = plt.subplots(1, 1, figsize = (7, 3), sharex = True)  
 zeta_max_tot = np.array([1.25e8, 1.25e9, 1.25e12])
 colors = ['darkred', 'forestgreen', 'royalblue']
 
@@ -167,7 +167,7 @@ for i, zeta_max in enumerate(zeta_max_tot):
     p = ax1.plot(k, omega_plus_constant, color = colors[i], label = label)
     p = ax2.plot(k, np.imag(omega_plus_constant), color = colors[i])
     
-    P = ax3.plot(k, omega_plus_constant, color = colors[i], label = label, linewidth = 2)
+    P = ax3.plot(k, omega_plus_constant, color = colors[i], label = label, linewidth = 1.5)
     # p = ax3.plot(k, omega_plus_constant, color = colors[i])
     
     # p = ax.plot(k, omega_minus_dhdx_negdu0dx, color = colors[i], linestyle = '--', label = label)
@@ -184,17 +184,19 @@ for ax in [ax1, ax2]:
     
 ax1.set_ylabel(r'$\text{Re}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
 ax2.set_ylabel(r'$\text{Im}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
-ax3.set_ylabel(r'$\text{Re}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
-# ax3.set_ylabel(r'$\text{Im}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
-fig.supxlabel(r'$k$ (m$^{-1}$)', fontsize = 15)
-fig.align_ylabels()
-fig.legend(loc='upper center', 
-                handles=labels, labelcolor='linecolor',  bbox_to_anchor=(1.07, 0.9), fontsize = 15)
+ax3.set_ylabel(r'$\text{Re}\{\omega_+\}$' + '\n(1/s)', fontsize = 12, rotation = 0, ha = 'left')
+ax3.yaxis.set_label_coords(-0.2,0.84)
 
+# ax3.set_ylabel(r'$\text{Im}\{\omega_+\}$ (s$^{-1}$)', fontsize = 15)
+ax3.set_xlabel(r'$k$ (1/m)', fontsize = 12)
+fig.align_ylabels()
+fig.legend(loc='lower center', 
+                handles=labels, labelcolor='linecolor',  bbox_to_anchor=(1.07, 0.2), fontsize = 12)
+ax3.ticklabel_format(axis = 'y', style = 'sci', scilimits=(0, 0))
 ax3.set_xscale('log')
-fig2.supxlabel(r'$k$ (m$^{-1}$)', fontsize = 15)
+# fig2.supxlabel(r'$k$ (m$^{-1}x$)', fontsize = 15)
 fig2.legend(loc='lower right', 
-                handles=labels, labelcolor='linecolor',  bbox_to_anchor=(0.9, 0.12), fontsize = 15)
+                handles=labels, labelcolor='linecolor',  bbox_to_anchor=(0.9, 0.1), fontsize = 15)
 # ax.set_title(r'$du_0/dx = {} \; \text{{s}}^{{-1}}, dh_0/dx = {}, dA_0/dx = {} \; \text{{m}}^{{-1}}$'.format(du0dx, dh0dx, dA0dx))
 # ax.set_title(r'$du_0/dx = {} \; \text{{s}}^{{-1}}, dh_0/dx = {}$'.format(du0dx, dh0dx))
 fig.savefig('omega_viscous_constant_plus.png')

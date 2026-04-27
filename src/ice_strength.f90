@@ -1,6 +1,7 @@
-subroutine ice_strength ( hin, Ain )
+subroutine ice_strength ( hin, Ain, uin)
   use size
   use rheology
+  use resolution
   use global_var
   use muphi
   use option
@@ -10,7 +11,29 @@ subroutine ice_strength ( hin, Ain )
 
   integer :: i
   
-  double precision, intent(in) :: hin(0:nx+1), Ain(0:nx+1)
+  double precision, intent(in) :: hin(0:nx+1), Ain(0:nx+1), uin(0:nx+1)
+  double precision :: deno, P0, rho_prime, dudx
+  double precision :: Pstar_prime(1:nx+1)
+  
+  rho_prime = ((rhowater - rho)/rhowater)*rho
+
+
+  if (Pstart_change) then 
+    do i = 1, nx ! for tracer points
+
+			dudx = ( uin(i+1) - uin(i) ) / Deltax
+
+      deno = alpha*sqrt( (dudx)**2d0 ) ! small2 is there to avoid div by zero
+      P0 = rho_prime*ge*hin(i)
+
+      Pstar_prime(i) = P0 + (Pstar - P0)*tanh(deno/denomin_P)
+    enddo
+  
+  else  
+    do i = 1, nx
+      Pstar_prime(i) = Pstar
+    enddo
+  endif
 
   if (rheo .eq. 1) then
 
@@ -20,7 +43,7 @@ subroutine ice_strength ( hin, Ain )
     Tp_half(nx+1) = 0d0
 
     do i = 1, nx
-      Pp_half(i) = 0.5d0 * Pstar * hin(i) * dexp(-C * ( 1d0 - Ain(i) ) )
+      Pp_half(i) = 0.5d0 * Pstar_prime(i) * hin(i) * dexp(-C * ( 1d0 - Ain(i) ) )
       Tp_half(i) = kt*Pp_half(i)
     enddo
   

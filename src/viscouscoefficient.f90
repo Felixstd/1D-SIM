@@ -14,10 +14,10 @@ subroutine viscouscoefficient(utp, zeta, eta)
 	double precision, intent(in) :: utp(1:nx+1)
 	double precision, intent(out):: zeta(0:nx+1), eta(0:nx+1)
 	double precision :: dudx, deno, denonum, denomin
-	double precision :: shearmax, Inertial_num, muI
-
-	denomin=2d-09
-  ! denomin = 2d-05
+	double precision :: shearmax, Inertial_num, muI, zeta_i, eta_i 
+! 
+	! denomin=2d-09
+  	denomin = 2d-05
 
 	muI = 0d0
 	Inertial_num = 0d0
@@ -26,22 +26,16 @@ subroutine viscouscoefficient(utp, zeta, eta)
 	if (rheo .eq. 2) then
 
 		do i = 1, nx
+			zeta_i =0 
+			eta_i = 0
 			dudx = ( utp(i+1) - utp(i) ) / Deltax
 			shearmax = sqrt( (dudx)**2d0+small2) 
-			! shearmax = sqrt
-			! shearmax  = abs(dudx) + small2
 
 			Inertial_num = min(d_average * shearmax * SQRT(rho * h(i)/(Pp_half(i)+Tp_half(i))), 1d0)
 			muI = max(mu_0 + ( mu_infty - mu_0 ) / ( I_0/Inertial_num + 1), mu_0)
-			! print*, sqrt( (dudx)**2d0+small2), shearmax
 
-
-			! call inertial_number(shearmax, h(i), Pp_half(i), Inertial_num)
-			! call angle_friction_mu(Inertial_num, muI)
-
-			! shearmax = sqrt( (dudx)**2d0+small2) 
-			! shearmax = shear_I(i)
-      		! shearmax = max(shear_I(i), 1d-20)
+			! muI = mu_0 + mu_infty*Inertial_num
+			mu_I(i) = muI
 
 			if (regularization .eq. 'tanh') then
 
@@ -50,16 +44,61 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
 			elseif (regularization .eq. 'capping') then
 				
-				zeta(i) = min(eta_max,  (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax))
-				eta(i) = min(eta_max/4d0,  (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax))
-				! eta(i) = zeta(i)/4
-				! print*, zeta(i)
-				! print*,'eta = ', eta(i)
-				! eta(i)  = min(eta_max/4d0, (muI / 2d0) * Pp_half(i) / (shearmax))
-				! print*, zeta(i), eta(i), zeta(i) + eta(i), Pp_half(i), shearmax, mu_b
+				zeta(i) = min(zeta_max,  (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax))
+
+				eta(i) = min(eta_max,  (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax))
+
+			elseif (regularization .eq. 'ringeisen') then 
+
+				zeta_i = (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax)
+				eta_i = (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax)
+				
+				zeta(i) = min(zeta_i, &
+						zeta_max*min(1d0,zeta_i/eta_i))
+				eta(i) = min(eta_i, &
+						eta_max*min(1d0,eta_i/zeta_i))
+
+			elseif (regularization .eq. 'ringeisen2') then 
+				zeta_i = (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax)
+				eta_i = (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax)
+				
+				zeta(i) = min(zeta_max,  (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax))
+				eta(i)  = min(eta_i, zeta_max*eta_i/zeta_i, eta_max)
+			
+			elseif (regularization .eq. 'div') then 
+
+				zeta_i = (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax)
+				eta_i = (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax)
+
+				zeta(i) = min(zeta_i, zeta_max* min(1d0, eta_i/eta_max, zeta_i/zeta_max))
+				eta(i) = min(eta_i, eta_max* min(1d0, eta_i/eta_max, zeta_i/zeta_max))
+				! if (shearmax < 1d-10) then 
+				! 	zeta(i) = zeta_max
+				! 	eta(i)  = eta_max
+				! else
+				! 	zeta(i) = (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax)
+				! 	eta(i) = (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax)
+				! endif
+			
+			elseif (regularization .eq. 'hard') then 
+				zeta(i) = min(zeta_max,  (mu_b) *(Pp_half(i)+Tp_half(i)) / (shearmax))
+
+				if (zeta(i) .eq. zeta_max) then
+					eta(i) = eta_max
+				else 
+					eta(i) = (muI) *(Pp_half(i)+Tp_half(i)) / (2d0*shearmax)
+
+				endif
+			
 			endif
 
-			P_half(i) = Pp_half(i)-Tp_half(i)
+			if (rep_closure) then 
+				P_half(i) = 2*abs(dudx)*zeta(i)
+			else
+
+
+				P_half(i) = Pp_half(i)-Tp_half(i)
+			endif
 
 
 		enddo
@@ -75,6 +114,8 @@ subroutine viscouscoefficient(utp, zeta, eta)
 				deno = alpha*sqrt( (dudx)**2d0 + small2 ) ! small2 is there to avoid div by zero
 				!     deno = alpha*(abs(dudx))
 				!     deno = max( deno, 1d-30 )
+				! if (Pstart_change) then 
+
 				zeta(i) = ((Pp_half(i)+Tp_half(i))/denomin)*tanh(denomin*(1d0/deno))
 
 			elseif ( regularization .eq. 'Kreyscher' ) then
@@ -87,12 +128,16 @@ subroutine viscouscoefficient(utp, zeta, eta)
 				deno = max((alpha*sqrt( (dudx)**2d0)), denomin)
         		! zeta(i) = (Pp_half(i)+Tp_half(i)) / deno
 
-        		zeta(i) = min(Pp_half(i)/(alpha*sqrt( (dudx)**2d0+small2)), eta_max)
+        		zeta(i) = min(Pp_half(i)/(alpha*sqrt( (dudx)**2d0+small2)), zeta_max)
+
+				! if (Pstart_change) then 
+				! 	zeta(i) = min(Pp_half(i)/(alpha*sqrt( (dudx)**2d0+small2)), zeta_max)
+				! endif
 				! print*, zeta(i), zeta(i) * e_2, Pp_half(i), sqrt( (dudx)**2d0+small2), alpha
         		! print*, zeta(i)
 			
 			elseif (regularization .eq. 'viscous') then 
-				zeta(i) = eta_max
+				zeta(i) = zeta_max
 
 
       		else

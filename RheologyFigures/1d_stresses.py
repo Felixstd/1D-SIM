@@ -49,19 +49,32 @@ sigma_11_VP = VP_rheology(dudx)
 
 sigma_11_GC = GC_rheology(dudx)
 
+positions = [0, 1/2*((1+e**(-2))**(1/2)-1), 1/2*(-(1+e**(-2))**(1/2)-1)]
+
+# new labels
+labels = ['0', r'', r'']
+
+
+
 plt.figure(figsize= (4, 3))
 ax = plt.axes()
 # ax.set_xscale('symlog', linthresh=1e-8  )
-plt.axhline(0, color = 'lightgray')
+# plt.axhline(0, color = 'lightgray')
 # plt.axvline(0, color = 'lightgray')
 # plt.text(0.5, 1, 'Divergence')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
 plt.plot(dudx, sigma_11_VP, label = 'VP', color = 'r')
-plt.plot(dudx, sigma_11_GC, label = 'GC', color = 'b')
+# plt.plot(dudx, sigma_11_GC, label = 'GC', color = 'b')
 plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-# plt.grid()
-plt.legend()
-
+plt.yticks(positions, labels, fontsize = 9)
+plt.text(4e-8, 0.1, r'$\frac{\sqrt{1.25}-1}{2}$')
+plt.text(-0.8e-6, -1,r'$\frac{-\sqrt{1.25}-1}{2}$')
+ax.yaxis.set_label_coords(0.3,0.92)
+# ax.spines['bottom'].set_position('center')
+ax.spines['left'].set_position('center')
+plt.xscale('symlog', linthresh = 1e-8)
 # plt.xscale('log')
-plt.xlabel(r'$\frac{\partial{u}}{\partial{x}}$')
-plt.ylabel(r'$\sigma_{11}/P^*$')
+plt.xlabel(r'$\frac{\partial{u}}{\partial{x}}$',fontsize=12)
+plt.ylabel(r'$\sigma_{11}/P^*$', rotation=0, fontsize=12, ha='left')
 plt.savefig('sigma_11.png')

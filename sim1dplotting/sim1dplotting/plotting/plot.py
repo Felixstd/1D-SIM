@@ -52,13 +52,17 @@ def histograms(ax, var, mu0, mu_infty,varname, I = False, I_0 = 0):
     # plt.savefig(figdir+expno+'/'+filename+'{}.png'.format(date))
     
         
-def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty, MuPhi = True, Dissipation = False):
+def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty, Parameters, Dissipation = False):
     
         
-    if Dissipation:
-        divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot = data_dict.values()
+    if Parameters.dissipation and Parameters.GC:
+        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot, P_tot, muI_tot = data_dict.values()
+    elif Parameters.GC and Parameters.dissipation == False:
+        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, P_tot, muI_tot = data_dict.values()
+    elif Parameters.GC == False and Parameters.dissipation == True:
+        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot= data_dict.values()
     else:
-        divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot = data_dict.values()
+        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot = data_dict.values()
     
         
     Nx = np.shape(divergence_tot)[1]
@@ -74,8 +78,14 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     fig_all_u = plt.figure(3, figsize = (5, 4))
     ax_all_u = plt.axes()
     
+    fig_all_div = plt.figure(5, figsize = (5, 4))
+    ax_all_div= plt.axes()
+    
     # print(dates)
     
+    if Parameters.GC:
+        fig_all_mu = plt.figure(4)
+        ax_all_mu = plt.axes()
     
     dates = dates*dt/(60*60)
     
@@ -88,10 +98,17 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         
         print('Plotting: ', date)
         
-        divergence = divergence_tot[k]
+        divergence, sig = divergence_tot[k], sigma_tot[k]
+        sig_norm = sigma_norm_tot[k]
         h, A = h_tot[k], A_tot[k]
         u = u_tot[k]
         eta, zeta = eta_tot[k], zeta_tot[k]
+        eta_max = np.max(eta)
+        zeta_max = np.max(zeta)
+        
+        if Parameters.GC:
+            muI = muI_tot[k]
+            P = P_tot[k]
         
         if Dissipation:
             w_dissip = Wdissip_tot[k]
@@ -116,19 +133,57 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         
         fig.savefig(figdir+'ice_u_{}_{}.png'.format(k, expno))
         
-        fig, (ax1)= plt.subplots(1, 1, sharex = True, figsize = (10, 12))
-        
-        ax1.plot(X[1:-1], eta[1:-1], color = 'r')
-        ax1.set_xlabel('X (km)')
-        ax1.set_ylabel(r'$\eta$ (Ns/m)')
+        fig, (ax1)= plt.subplots(1, 1, sharex = True, figsize = (5, 4))
+             
+        ax1.plot(X[1:-1], eta[1:-1], color = 'r', label = r'$\eta$')
+        ax1.plot(X[1:-1], zeta[1:-1], color = 'b', label = r'$\zeta$')
+        ax1.set_xlabel('x (km)')
+        ax1.set_ylabel(r'Viscosity (Ns/m)')
         # ax1.set_xlim(Nx)
         ax1.grid()
+        plt.legend()
         # ax1.set_aspect('equal')
         ax1.set_aspect(1./ax1.get_data_ratio())        
         
         # plt.axis('equal')
         
         fig.savefig(figdir+'ice_eta_{}_{}.png'.format(k, expno))
+        
+        fig, (ax1)= plt.subplots(1, 1, sharex = True, figsize = (7, 3))
+        
+        colors_sig = []
+        for i in range(1, len(eta)-1):
+            eta_i = eta[i]
+            zeta_i = zeta[i]
+            
+            if eta_i == eta_max and zeta_i == zeta_max :
+                colors_sig.append('r')
+            
+            elif eta_i != eta_max and zeta_i == zeta_max :
+                
+                colors_sig.append('b')
+                
+            elif eta_i == eta_max and zeta_i != zeta_max :
+                
+                colors_sig.append('orange')
+                
+            else:
+                colors_sig.append('g')
+                
+        
+        ax1.scatter(divergence[1:-1], sig_norm[1:-1], c = colors_sig)
+        ax1.set_xlabel(r'$\dot{\epsilon}_I$ (1/s)')
+        ax1.set_ylabel(r'$\sigma_{11}/P$')
+        ax1.set_xscale('symlog', linthresh = 1e-8)
+        ax1.set_xlim(-1e-3, 1e-3 )
+        # ax1.set_xlim(Nx)
+        ax1.grid()
+        # ax1.set_aspect('equal')
+        # ax1.set_aspect(1./ax1.get_data_ratio())        
+        
+        # plt.axis('equal')
+        
+        fig.savefig(figdir+'ice_sigma_{}_{}.png'.format(k, expno))
         
         if Dissipation:
             fig, (ax4)= plt.subplots(1, 1, sharex = True, figsize = (10, 12))
@@ -144,6 +199,30 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
             # plt.axis('equal')
             
             fig.savefig(figdir+'ice_wdissip_{}_{}.png'.format(k, expno))
+            
+        if Parameters.GC:
+            fig, (ax4)= plt.subplots(1, 1, sharex = True, figsize = (5, 5))
+            
+            criteria_conv = (-muI-1)*P/1e9
+            criteria_div = (muI-1)*P/1e9
+            
+            # ax4.plot(X[1:-1], criteria_conv[:-1], color = 'r')
+            # ax4.plot(X[1:-1], criteria_div[:-1], color = 'g')
+            # ax4.plot(X[1:-1], divergence[1:-1], color = 'k')
+            print(criteria_div[:-1][divergence[1:-1] > 0])
+            # ax4.scatter( divergence[1:-1][divergence[1:-1] < 0], criteria_conv[:-1][divergence[1:-1] < 0])
+            ax4.scatter( divergence[1:-1][divergence[1:-1] > 0], criteria_div[:-1][divergence[1:-1] > 0])
+            # ax4.plot(X[1:-1], P[:-1]/P.max(), color = 'b')
+            ax4.set_xlabel('X (km)')
+            ax4.set_ylabel(r'$criteria$')
+            # ax4.set_xlim(150, 350)
+            ax4.grid()
+            # ax1.set_aspect('equal')
+            # ax4.set_aspect(1./ax1.get_data_ratio())        
+            
+            # plt.axis('equal')
+            
+            fig.savefig(figdir+'ice_criteria_{}_{}.png'.format(k, expno))
         
         #--- Plot of A and h ---# 
         fig, (ax1, ax2)= plt.subplots(1, 2, sharex = True, figsize = (10, 12))
@@ -170,7 +249,10 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         ax_all_u.plot(X[1:-1], u[:-1], label = '{}'.format(date), color = color)
         ax_all_h.plot(X[1:-1], h[1:-1], label = '{}'.format(date), color = color)
         
+        ax_all_div.plot(X[1:-1], divergence[1:-1], label = '{}'.format(date), color = color)
         
+        if Parameters.GC:
+            ax_all_mu.plot(X[1:-1], muI[0:-1], label = '{}'.format(date), color = color)
         # plt.axis('equal')
         
         fig.savefig(figdir+'ice_A_h_{}_{}.png'.format(k, expno))
@@ -185,7 +267,7 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     plt.close()
     
     # ax_all_h.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    ax_all_h.grid()
+    # ax_all_h.grid()
     ax_all_h.set_xlabel(r'$x$ (km)')
     ax_all_h.set_ylabel(r'$h$ (m)')
     # ax_all_h.set_aspect('equal', 'datalim')
@@ -194,7 +276,7 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     plt.close()
     
     # ax_all_h.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    ax_all_u.grid()
+    # ax_all_u.grid()
     ax_all_u.set_xlabel('$x$ (km)')
     ax_all_u.set_ylabel('$u$ (m/s)')
     sm = cm.ScalarMappable(cmap = cmap,
@@ -202,6 +284,27 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     fig_all_u.colorbar(sm, ax = ax_all_u, 
                        label = 'Time (hr)')
     fig_all_u.savefig(figdir+'time_plot_u_{}.png'.format(expno))
+    plt.close()
+    
+    if Parameters.GC:
+        ax_all_mu.grid()
+        ax_all_mu.set_xlabel('$x$ (km)')
+        ax_all_mu.set_ylabel(r'$\mu$')
+        sm = cm.ScalarMappable(cmap = cmap,
+                            norm = norm)
+        fig_all_mu.colorbar(sm, ax = ax_all_mu, 
+                        label = 'Time (hr)')
+        fig_all_mu.savefig(figdir+'time_plot_mu_{}.png'.format(expno))
+        plt.close()
+    
+    ax_all_div.grid()
+    ax_all_div.set_xlabel('$x$ (km)')
+    ax_all_div.set_ylabel(r'$\mu$')
+    sm = cm.ScalarMappable(cmap = cmap,
+                           norm = norm)
+    fig_all_div.colorbar(sm, ax = ax_all_div, 
+                       label = 'Time (hr)')
+    fig_all_div.savefig(figdir+'time_plot_div_{}.png'.format(expno))
     plt.close()
         
         
@@ -230,7 +333,7 @@ def plot_velocities(max_vel, max_capping,colors, dt, tstep, expno, figdir, regim
 
     fig = plt.figure(figsize = (5, 4))
     ax = plt.axes()
-    ax2 = ax.twinx()
+    # ax2 = ax.twinx()
     
     # labels = []
     for i, maxvel in enumerate(max_vel):
@@ -238,15 +341,11 @@ def plot_velocities(max_vel, max_capping,colors, dt, tstep, expno, figdir, regim
         
         mantissa, exponent = f"{ max_capping[i]:.2e}".split('e')
     
-        label = r"$\nu_{{max}} = {} \times 10^{{{}}}$".format(mantissa, int(exponent))
+        # label = r"$\nu_{{max}} = {} \times 10^{{{}}}$".format(mantissa, int(exponent))
         
-        if i > 0:
-            ax2.plot(time_plot, maxvel,color = colors[i], label = label)
-            ax2.tick_params(axis='y', color = colors[i], labelcolor=colors[i])
-            
-        else:
-            pc = ax.plot(time_plot, maxvel,color = colors[i], label = label)
-            ax.tick_params(axis='y',  color = colors[i],labelcolor=colors[i])
+
+        pc = ax.plot(time_plot, maxvel,color = colors[i])
+        ax.tick_params(axis='y',  color = colors[i],labelcolor=colors[i])
     
     # pc = plt.plot(time_plot, min_vel, color = 'b')
     fig.legend(loc='lower center', 
@@ -256,10 +355,10 @@ def plot_velocities(max_vel, max_capping,colors, dt, tstep, expno, figdir, regim
     ax.set_xlabel('Time (hr)')
     ax.set_ylabel('max{$u_i$} (m/s)')
     ax.grid()
-    ax.set_ylim(0, 10)
-    ax2.set_ylim(0, 0.01)
-    ax.set_yticks(np.linspace(0, 10, 5))
-    ax2.set_yticks(np.linspace(0, 0.01, 5))
+    # ax.set_ylim(0, 10)
+    # ax2.set_ylim(0, 0.01)
+    # ax.set_yticks(np.linspace(0, 10, 5))
+    # ax2.set_yticks(np.linspace(0, 0.01, 5))
     plt.savefig(figdir+'maxmin_velocities_{}.png'.format(regime))
     plt.close()
     
@@ -359,13 +458,18 @@ def plot_initial_conditions(A_tot, h_tot, u_tot, Parameters, figdir, expno):
     plt.savefig(figdir+'init_conditions_{}.png'.format(expno))
     plt.close()
     
-def plot_energy(datadict_energy_Tavg,num_plas, num_visc, Parameters, figdir):
+def plot_energy(datadict_energy_Tavg,num_plas, num_visc,number_mixed_viszeta, number_mixed_viseta, Parameters, figdir):
     
     
-    Plat_Tavg, Pfric_S_Tavg, Pfric_R_Tavg, Pfric_S_visc_Tavg, Pfric_R_visc_Tavg,  Pfric_S_plas_Tavg, Pfric_R_plas_Tavg, Ph_Tavg, Pw_Tavg, Ppot_Tavg = datadict_energy_Tavg.values()
+    Plat_Tavg, Pfric_S_Tavg, Pfric_R_Tavg,Pfric_S_visc_Tavg, Pfric_R_visc_Tavg, \
+        Pfric_S_plas_Tavg, Pfric_R_plas_Tavg, P_fric_R_pZ_vE_Tavg, P_fric_R_vZ_pE_Tavg , \
+            Ph_Tavg, Pw_Tavg, Ppot_Tavg = datadict_energy_Tavg.values()
+
+    
+    
+    
     energy = [Plat_Tavg, Pfric_S_Tavg, Pfric_R_Tavg, Ph_Tavg, Pw_Tavg, Ppot_Tavg] 
     labels = [r'$P_{lat}$ (W/m$^2$)', r'$P_{f}^S$ (W/m$^2$)', r'$P_{f}^R$ (W/m$^2$)', r'$P_{h}$ (W/m$^2$)', r'$P_{w}$ (W/m$^2$)', r'$P_{pot}$ (W/m$^2$)']
-    
     time = np.arange(1, Parameters.nstep)*Parameters.dt/(60*60)
     
     sum_energy = np.sum(energy, axis = 0)
@@ -383,27 +487,36 @@ def plot_energy(datadict_energy_Tavg,num_plas, num_visc, Parameters, figdir):
         plt.savefig(figdir+'energy_{}.png'.format(i))
 
     fig = plt.figure()
-    plt.plot(time, Ppot_Tavg[0], label = r'$P_{pot}$ ')
-    plt.plot(time, Pfric_R_Tavg[0], label = r'$P_{fric}^R$')
-    plt.plot(time, Pfric_S_Tavg[0], label = r'$P_{fric}^S$')
-    plt.plot(time, Plat_Tavg[0], label = r'$P_{lat}$')
-    plt.plot(time, np.sum(energy[0:3], axis =0)[0], label = r'$P_i$')
+    # plt.plot(time, Ppot_Tavg[0], label = r'$P_{pot}$ ')
+    # plt.plot(time, Pfric_R_Tavg[0], label = r'$P_{fric}^R$')
+    plt.plot(time, Pfric_R_visc_Tavg[0], label = r'$P_{fric, vis}^R$ ')
+    plt.plot(time, Pfric_R_plas_Tavg[0], label = r'$P_{fric, plas}^R$ ')
+
+    # plt.plot(time, Pfric_R_plas_Tavg[0] + Pfric_R_visc_Tavg[0])
+    plt.plot(time, P_fric_R_pZ_vE_Tavg[0], label = r'$P_{fric, plas \; \zeta}^R$')
+    plt.plot(time, P_fric_R_vZ_pE_Tavg[0], label = r'$P_{fric, plas \; \eta}^R$')
     fig.legend(loc = 'outside upper center', bbox_to_anchor = (1.1, 0.9))
     plt.xlabel(r'Time (hr)')
     plt.ylabel(r'P (W/m$^2$)')
     plt.savefig(figdir+'energy_internal_stresses.png')
     
+    fig = plt.figure(figsize = (7, 4))
+    ax = plt.axes()
+    plt.plot(time, Pfric_R_visc_Tavg[0], label = r'$P_{fric, vis}^R$ ')
+    plt.plot(time, Pfric_R_plas_Tavg[0], label = r'$P_{fric, plas}^R$ ')
+    plt.plot(time, Ppot_Tavg[0], label = r'$P_{pot}^R$ ')
+    plt.plot(time, Ppot_Tavg[0] + Pfric_R_Tavg[0],  label = r'$P_{pot} + P_{fric}^R$')
+    ax.set_yscale('symlog', linthresh=1e-1)
+    fig.legend(loc = 'outside upper center', bbox_to_anchor = (1, 0.9))
+    plt.xlabel(r'Time (hr)')
+    plt.ylabel(r'P (W/m$^2$)')
+    plt.savefig(figdir+'energy_internal_stresses_tot.png')
+    
     fig = plt.figure()
     plt.plot(time, Pfric_R_plas_Tavg[0], label = r'$P_{fric, plas}^R$ ')
-    plt.plot(time, Pfric_S_plas_Tavg[0], label = r'$P_{fric, plas}^s$')
+    plt.plot(time, Pfric_R_Tavg[0], label = r'$P_{fric}^R$')    
     plt.plot(time, Pfric_R_visc_Tavg[0], label = r'$P_{fric, vis}^R$ ')
-    plt.plot(time, Pfric_S_visc_Tavg[0], label = r'$P_{fric, vis}^s$')
-    plt.plot(time, Pfric_S_visc_Tavg[0]+Pfric_S_plas_Tavg[0], label = r'$P_{fric}^s$')
-    plt.plot(time, Pfric_R_visc_Tavg[0]+Pfric_R_plas_Tavg[0], label = r'$P_{fric}^R$')
-    # plt.plot(time, Pfric_S_Tavg[0], label = r'$P_{fric}^S$')
-    # plt.plot(time, Pfric_R_Tavg[0], label = r'$P_{fric}^S$')
-    # plt.plot(time, Plat_Tavg[0], label = r'$P_{lat}$')
-    # plt.plot(time, np.sum(energy[0:3], axis =0)[0], label = r'$P_i$')
+    plt.plot(time, Pfric_R_visc_Tavg[0]+Pfric_R_plas_Tavg[0], linestyle = '--')
     fig.legend(loc = 'outside upper center', bbox_to_anchor = (1.1, 0.9))
     plt.xlabel(r'Time (hr)')
     plt.ylabel(r'P (W/m$^2$)')
@@ -411,24 +524,31 @@ def plot_energy(datadict_energy_Tavg,num_plas, num_visc, Parameters, figdir):
     
     
     plt.figure()
+    ax = plt.axes()
     plt.plot(time, sum_energy[0], label = r'$\sum P$ ')
-    plt.plot(time, Ph_Tavg[0], label = r'$P_{h}$')
+    # plt.plot(time, Ph_Tavg[0], label = r'$P_{h}$')
     plt.plot(time, Ppot_Tavg[0], label = r'$P_{pot}$')
-    plt.plot(time, Pw_Tavg[0], label = r'$P_{w}$')
+    # plt.plot(time, Pw_Tavg[0], label = r'$P_{w}$')
     plt.plot(time, np.sum(energy[0:3], axis =0)[0], label = r'$P_i$')
+    plt.yscale('symlog', linthresh = 1)
     plt.legend()
     plt.xlabel(r'Time (hr)')
-    plt.ylabel(r'M (W/m$^2$)')
+    plt.ylabel(r'Power' +'\n(W/m$^2$)', rotation = 0, ha = 'left')
+    ax.yaxis.set_label_coords(-0.34,0.82)
     plt.savefig(figdir+'energy_tot.png')
     
-    plt.figure()
+    fig = plt.figure()
+    ax = plt.axes()
     plt.plot(time, num_plas, label = r'$N_{plas}$')
-    plt.plot(time, num_visc+num_plas)
+    # plt.plot(time, num_visc+num_plas)
     plt.plot(time, num_visc,  label = r'$N_{visc}$')
-    plt.legend()
+    # plt.plot(time,number_mixed_viszeta, label = r'$N_{visc \; \zeta, plas \; \eta}$')
+    # plt.plot(time, number_mixed_viseta, label = r'$N_{visc \; \eta, plas \; \zeta }$')
+    plt.legend(loc = 'best')
     plt.xlabel(r'Time (hr)')
-    plt.ylabel('N')
-    plt.grid()
+    plt.ylabel('Number'+'\nof grid cells', rotation = 0, ha = 'left')
+    ax.yaxis.set_label_coords(-0.37,0.78)
+    # plt.grid()
     plt.savefig(figdir+'number_regime.png')
     
     

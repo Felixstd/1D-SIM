@@ -36,6 +36,8 @@ use size
   DOUBLE PRECISION :: P_fric_S(0:nx+1)
   DOUBLE PRECISION :: P_fric_R_visc(0:nx+1)
   DOUBLE PRECISION :: P_fric_S_visc(0:nx+1)
+  DOUBLE PRECISION :: P_fric_R_vZ_pE(0:nx+1)
+  DOUBLE PRECISION :: P_fric_R_pZ_vE(0:nx+1)
   DOUBLE PRECISION :: P_fric_R_plas(0:nx+1)
   DOUBLE PRECISION :: P_fric_S_plas(0:nx+1)
   DOUBLE PRECISION :: P_lat(0:nx+1)

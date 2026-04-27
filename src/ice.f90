@@ -34,7 +34,7 @@ program ice
 
     logical :: p_flag, restart
     integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
-    integer :: out_step(11), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
+    integer :: out_step(21), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
     integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
     double precision :: e, rhoair, Cdair, Cdwater
     double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
@@ -48,7 +48,7 @@ program ice
     !-- FSTD --!
     logical :: output_diag
     integer :: time_out, n_output, output_time, count
-    double precision :: P_pot_avg, P_fric_R_avg, P_fric_S_avg, P_lat_avg, P_h_avg, P_w_avg
+    double precision :: P_pot_avg, P_fric_R_avg, P_fric_S_avg, P_lat_avg, P_h_avg, P_w_avg, P_fric_R_vZ_pE_avg, P_fric_R_pZ_vE_avg
     double precision :: P_fric_R_visc_avg, P_fric_S_visc_avg, P_fric_R_plas_avg, P_fric_S_plas_avg
     double precision, allocatable :: h_time(:), A_time(:), utp_time(:)
     double precision, allocatable :: P_pot_Tavg(:)
@@ -58,6 +58,7 @@ program ice
     double precision, allocatable :: P_lat_Tavg(:)
     double precision, allocatable :: P_h_Tavg(:)
     double precision, allocatable :: P_w_Tavg(:)
+    double precision, allocatable :: P_fric_R_vZ_pE_Tavg(:), P_fric_R_pZ_vE_Tavg(:)
     
     character filename*64
 
@@ -70,7 +71,7 @@ program ice
 !     Input by user
 !------------------------------------------------------------------------
     !---- I = 0.1 -----!
-    expnb      = 69
+    expnb      = 19
     rheo           = 1
     linear_drag    = .false.
     linear_viscous = .false. ! linear viscous instead of viscous-plastic
@@ -93,9 +94,10 @@ program ice
     initcond_vel   = 'Graysmooth'
     mechenergy     = .true.
     advection_mom  = .false.
+    Pstart_change  = .true.
 
     solver     = 1    ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
-    IMEX       = 0      ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+    IMEX       = 0   ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
     BDF2       = 0     ! 0: standard, 1: Backward difference formula (2nd order)
 
 
@@ -113,9 +115,10 @@ program ice
     
     out_step(1) = 1
     
-    do n_output = 2, 11
-        time_out = time_out + T_tot / 10
-        output_time = output_time + nstep/10
+    do n_output = 2, 21
+        time_out = time_out + T_tot / 20
+        output_time = output_time + nstep/20
+        print*, output_time
         write(10, *) (output_time)
         out_step(n_output)=output_time   
     
@@ -124,7 +127,7 @@ program ice
     close(10)
 
     !-- Solver Options --!
-    Nmax_OL    = 500
+    Nmax_OL    = 1000
 
     T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
     N_sub = 900
@@ -191,6 +194,8 @@ program ice
     allocate(P_fric_S_visc_Tavg(tsfin))
     allocate(P_fric_R_plas_Tavg(tsfin))
     allocate(P_fric_S_plas_Tavg(tsfin))
+    allocate(P_fric_R_vZ_pE_Tavg(tsfin))
+    allocate(P_fric_R_pZ_vE_Tavg(tsfin))
 
     
 !------------------------------------------------------------------------
@@ -206,6 +211,8 @@ program ice
 
     if ( nx .eq. 100 ) then 
         Deltax   =  20d03  ! grid size [m], the domain is always 2000 km 
+    elseif (nx .eq. 50) then 
+        Deltax = 10d03
     elseif  ( nx .eq. 200 ) then
         Deltax   =  1            
     elseif  ( nx .eq. 500 ) then
@@ -232,8 +239,9 @@ program ice
 !------------------------------------------------------------------------
 
     C          = 20d0         ! ice strength parameter (watchout no A for now)
-    Pstar      = 27.5d03 ! ice compression strength parameter
+    Pstar      = 27.5d03! ice compression strength parameter
     e          = 2d0    ! ratio long to short axis of ellipse
+    denomin_P  = 2d-09
 
     e_2        = 1/(e**2d0)   !
     alpha      = sqrt(1d0 + e_2)
@@ -267,13 +275,15 @@ program ice
    ! mu_b       = 1d0/(alpha)
    mu_0       = 0.2
    mu_infty   = 0.8
-   mu_b       = 1d0
+   mu_b       = 1.05d0
    I_0        = 1e-3
    Phi_0      = 1
    c_phi      = 1
    D = 0.0001 !DEFAULT was -0.00001
    n = 2 !for super gaussian 
+   zeta_max   = 1d9
    eta_max    = 1d9
+   
 
    output_diag = .false.
 
@@ -332,7 +342,7 @@ program ice
             if (rheo .eq. 2) then
                 call ice_strength (hn1, An1) ! standard approach no IMEX 
             else 
-                call ice_strength (hn1, An1) 
+                call ice_strength (hn1, An1, un1) 
             endif
         
         endif
@@ -355,7 +365,7 @@ program ice
                     call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
                     ! call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
                     ! call shear(un1)
-                    call ice_strength (h, A) ! standard approach no IMEX 
+                    call ice_strength (h, A, u) ! standard approach no IMEX 
                     ! call inertial_number()
                     ! call angle_friction_mu()
                 endif
@@ -382,7 +392,7 @@ program ice
                     
                     call bvect(tauair, un1, Cw, b)
                     ! call output_sor(ts,k,solver, expnb,b)
-                    call SOR (b, u, h, A, zeta, eta, Cw, Cb, p_flag, ts)
+                    call SOR (b, u, un1, h, A, zeta, eta, Cw, Cb, p_flag, ts)
       !             call SOR_A (b, u, zeta, eta, Cw, k, ts)
                 elseif (solver .eq. 2) then
                     call prepFGMRES_NK(u, h, A, F_uk1, zeta, eta, Cw, Cb, un1, un2, tauair, &
@@ -421,7 +431,8 @@ program ice
         if (mechenergy) then 
             call mechanical_energy(u, zeta, eta, Cw)
             call average_mech_energy(P_pot_avg, P_fric_R_avg, P_fric_S_avg, P_fric_R_visc_avg, P_fric_S_visc_avg, &
-                                P_fric_R_plas_avg, P_fric_S_plas_avg,P_lat_avg, P_h_avg, P_w_avg)
+                                P_fric_R_plas_avg, P_fric_S_plas_avg,P_lat_avg, P_h_avg, P_w_avg, &
+                                P_fric_R_vZ_pE_avg, P_fric_R_pZ_vE_avg)
             
             P_pot_Tavg(ts) = P_pot_avg
             P_fric_R_Tavg(ts) = P_fric_R_avg
@@ -433,7 +444,9 @@ program ice
             P_lat_Tavg(ts) = P_lat_avg
             P_h_Tavg(ts) = P_h_avg
             P_w_Tavg(ts) = P_w_avg
-        
+            P_fric_R_pZ_vE_Tavg(ts) = P_fric_R_pZ_vE_avg
+            P_fric_R_vZ_pE_Tavg(ts) = P_fric_R_vZ_pE_avg
+
         endif
 
 !------------------------------------------------------------------------
@@ -479,7 +492,7 @@ program ice
 !     output results
 !------------------------------------------------------------------------
 
-        if (any(ts == out_step(1:10))) then
+        if (any(ts == out_step(1:21))) then
             print *, 'outputting results'
             call output_results(ts, expnb, solver, u, zeta, eta)
             call output_file(e, gamma_nl, solver, expnb)
@@ -513,7 +526,8 @@ program ice
 
     call output_mech_energy(P_pot_Tavg, P_fric_R_Tavg, P_fric_S_Tavg,P_fric_R_visc_Tavg, &
                             P_fric_S_visc_Tavg, P_fric_R_plas_Tavg, P_fric_S_plas_Tavg, P_lat_Tavg, &
-                            P_h_Tavg, P_w_Tavg, ts, expnb, solver, nstep)
+                            P_h_Tavg, P_w_Tavg, P_fric_R_vZ_pE_Tavg, P_fric_R_pZ_vE_Tavg, &
+                            ts, expnb, solver, nstep)
 
     !call output_times(ts, expnb, solver, nstep, A_time, h_time, utp_time)
     deallocate(A_time, h_time, utp_time) 
@@ -523,5 +537,3 @@ program ice
     endif
   
 end program ice
-      
-

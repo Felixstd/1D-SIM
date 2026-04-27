@@ -49,8 +49,8 @@ for exp in Parameters.expno:
 	Dates_Config = TimeUtility(configuration_time = config_exp['Time'], 
 							  configuration_fig  = config_exp['Figures'])
 	tstep, dates_time = (TimeUtility.read_time(Dates_Config, expno = exp))
-
-
+	print(tstep)
+	# tstep[0] = 1
 
 	if not os.path.isdir(Parameters.figdir+str(exp)):
 		os.mkdir(Parameters.figdir+str(exp))
@@ -69,7 +69,8 @@ for exp in Parameters.expno:
 				tstep, 
 				Parameters.outputdir, 
 				Dissipation=Parameters.dissipation, 
-				Energy=Parameters.mechanical_energy
+				Energy=Parameters.mechanical_energy, 
+				GC = Parameters.GC
 			)
 
 			datadict_energy_Tavg = read_data.read_avg_energy(
@@ -81,8 +82,9 @@ for exp in Parameters.expno:
                	Parameters.adv, 
                 Parameters.nstep, 
                 Parameters.outputdir)
-			number_viscous, number_plastic = read_data.read_visc_plas_file('num_visc_plas_{}.out'.format(exp))
-
+			number_viscous, number_plastic = read_data.read_visc_plas_file('outputs_VP/num_visc_plas_{}.out'.format(exp))
+   
+			number_mixed_viszeta, number_mixed_viseta = read_data.read_visc_plas_file('outputs_VP/num_mixed_visc_plas_{}.out'.format(exp))
 		else:
 			datadict = read_data.read_data(
 				exp, 
@@ -105,22 +107,37 @@ for exp in Parameters.expno:
 				Parameters.dx = 500
 			if Parameters.Nx == 2002:
 				Parameters.dx = 250
-	
-		if Parameters.dissipation:
-			divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot = datadict.values()
+    
+		if Parameters.dissipation and Parameters.GC:
+			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot, P_tot, muI_tot = datadict.values()
+		elif Parameters.GC and Parameters.dissipation == False:
+			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, P_tot, muI_tot = datadict.values()
+		elif Parameters.GC == False and Parameters.dissipation == True:
+			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot= datadict.values()
 		else:
-			divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot = datadict.values()
+			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot = datadict.values()
 		
 		plot.plot_initial_conditions(A_tot, h_tot, u_tot, Parameters, Parameters.figdir+str(exp)+'/', exp)
 
 		if Parameters.savevar:
 			datadict_saved = datadict.copy()
-			datadict_saved['timestep'] = int(Parameters.dt)
-			datadict_saved['resolution'] = int(Parameters.dx/1e3)
+			datadict_saved['timestep'] = float(Parameters.dt)
+			datadict_saved['resolution'] = float(Parameters.dx/1e3)
 			datadict_saved['dates'] = dates_time
+			datadict_saved['Number_Regimes'] = [number_viscous, number_plastic, number_mixed_viszeta, number_mixed_viseta]
 			np.save('SavedExperiments/datadict_exp_{}.npy'.format(exp), datadict_saved)
+			datadict_energy_saved = datadict_energy_Tavg.copy()
+			np.save('SavedExperiments/datadict_energy_saved_{}.npy'.format(exp), datadict_energy_saved)
 # X = np.linspace(0, nx*dx, nx)
 
+	if Parameters.maxvelocities:
+		file = "/aos/home/fstdenis/1D-SIM/output_post_files/min_max_vel_{}.out".format(exp)
+		max_velocities, min_velocities, tstep = read_data.read_maxvelocities(file)
+		print(len(max_velocities))
+		maxvel_exp.append(max_velocities)
+		
+		datadict_saved = {'max': max_velocities, 'min': min_velocities, 'tstep': tstep}
+		np.save('SavedExperiments/datadict_maxvel_{}.npy'.format(exp), datadict_saved)
 # 
 	if Parameters.plotfields:
 		
@@ -149,16 +166,16 @@ for exp in Parameters.expno:
 #---------- Plotting ----------#
 	if Parameters.plotsingle:
     
-		# plot.plot_individual_time(tstep, 
-        #                     		exp, 
-        #                       		datadict, 
-        #                         	Parameters.dx,
-        #                          	Parameters.dt,
-		# 							Parameters.figdir+str(exp)+'/', 
-        #  							0, 
-        #         					0,
-        #              				MuPhi = Parameters.muphi,
-        #                  			Dissipation = Parameters.dissipation)
+		plot.plot_individual_time(tstep, 
+                            		exp, 
+                              		datadict, 
+                                	Parameters.dx,
+                                 	Parameters.dt,
+									Parameters.figdir+str(exp)+'/', 
+         							0, 
+                					0,
+                     				Parameters,
+                         			Dissipation = Parameters.dissipation)
 
 		if Parameters.mechanical_energy:
 			plot.plot_mechanical_energy(
@@ -168,78 +185,16 @@ for exp in Parameters.expno:
                             Parameters.figdir+str(exp)+'/', 
                             exp
                             )
-			plot.plot_energy(datadict_energy_Tavg,number_plastic, number_viscous, Parameters, Parameters.figdir+str(exp)+'/')
+			plot.plot_energy(datadict_energy_Tavg,number_plastic, number_viscous, number_mixed_viszeta, number_mixed_viseta, Parameters, Parameters.figdir+str(exp)+'/')
 			
 
    
    
    
-		if Parameters.maxvelocities:
-			file = "/aos/home/fstdenis/1D-SIM/output_post_files/min_max_vel_{}.out".format(exp)
-			max_velocities, min_velocities, tstep = read_data.read_maxvelocities(file)
-			print(len(max_velocities))
-			maxvel_exp.append(max_velocities)
+
 
 if Parameters.maxvelocities:
 	plot.plot_velocities(maxvel_exp, Parameters.maxcapping, [mpl.colormaps['Set1'].colors[2],mpl.colormaps['Set1'].colors[0]] , Parameters.dt, tstep, exp, './', 'viscous')
 
 
-
-
-#------ Viscous Experiments -------#
-datadict_lowcapping = np.load('/aos/home/fstdenis/1D-SIM/sim1dplotting/SavedExperiments/datadict_exp_58.npy', 
-                              allow_pickle=True).item()
-datadict_highcapping = np.load('/aos/home/fstdenis/1D-SIM/sim1dplotting/SavedExperiments/datadict_exp_59.npy', 
-                              allow_pickle=True).item()
-
-divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot, _, _, _ = datadict_lowcapping.values()
-dx = datadict_lowcapping['resolution']
-dates = datadict_lowcapping['dates']
-# print(dates)
-Nx = np.shape(divergence_tot)[1]
-X = np.arange(0, Nx)*dx
-
-norm = colors.Normalize(vmin=0, vmax=dates[-1])  # assuming k ranges from 0 to 10
-cmap = plt.cm.viridis
-sm = pltcm.ScalarMappable(cmap=cmap, norm=norm)
-
-
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize = (11, 8), sharex = True)
-
-axs = [ax1, ax2, ax3, ax4]
-c = 0
-for i, ax in enumerate(axs):
-    
-    ax.grid()
- 
-    if i % 2 == 0:
-        divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot, dt, dx, dates = datadict_lowcapping.values()
-    else:
-        divergence_tot, h_tot, A_tot, u_tot, eta_tot, zeta_tot, Wdissip_tot, dt, dx, dates= datadict_highcapping.values()
-        
-    for k, date in enumerate(dates):
-        divergence = divergence_tot[k]
-        h, A = h_tot[k], A_tot[k]
-        u = u_tot[k]
-        eta, zeta = eta_tot[k], zeta_tot[k]
-        
-        color = cmap(k/10)
-        
-        if c > 1:
-            ax.plot(X[1:-1], u[:-1], label = '{}'.format(date), color = color)
-        else:
-            ax.plot(X[1:-1], h[1:-1], label = '{}'.format(date), color = color)
-
-            
-    c +=1
-    
-
-fig.supxlabel(r'$x$ (km)', y = 0.05, x = 0.43)
-fig.align_ylabels()
-ax1.set_ylabel(r'$h$ (m)')
-ax1.set_title(r'$\nu_{max} = 1.25 \times 10^{8}$ Nsm$^{{-1}}$')
-ax2.set_title(r'$\nu_{max} = 1.25 \times 10^{12}$ Nsm$^{{-1}}$')
-fig.colorbar(sm, ax=axs, label = 'Time (hr)')
-ax3.set_ylabel(r'$u$ (m/s)')
-fig.savefig('viscous_numerical.png', dpi = 500)
 

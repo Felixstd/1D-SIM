@@ -38,6 +38,12 @@ subroutine Fu (utp, un1, un2, htp, R_uk1, Fu_vec)
 	         (rho * h_at_u / (2d0*Deltat)) * ( 3d0*(utp(i)-un1(i)) - (un1(i)-un2(i)) )
       endif
 
+     if (advection_mom) then 
+          Fu_vec(i) = Fu_vec(i) + & 
+	         (rho * h_at_u / (2d0*Deltax)) * ( (utp(i+1)-utp(i-1)) )*utp(i)
+     endif
+
+
 !------------------------------------------------------------------------
 !     Substract the R vector
 !------------------------------------------------------------------------
@@ -120,6 +126,10 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
      
 
      R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
+
+     ! if (advection_mom) then  
+     !      R_vec(i) = R_vec(i) - (rho/(2d0*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
+     ! endif
      
      
   enddo
