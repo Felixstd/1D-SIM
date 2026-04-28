@@ -495,7 +495,7 @@ program ice
         if (any(ts == out_step(1:21))) then
             print *, 'outputting results'
             call output_results(ts, expnb, solver, u, zeta, eta)
-            call output_file(e, gamma_nl, solver, expnb)
+            call output_file(expnb)
         endif
 
 !------------------------------------------------------------------------

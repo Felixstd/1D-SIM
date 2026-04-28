@@ -1,4 +1,4 @@
-subroutine output_file(e, gamma_nl, solver, expnb)
+subroutine output_file(expnb)
  
   use size
   use rheology
@@ -11,8 +11,7 @@ subroutine output_file(e, gamma_nl, solver, expnb)
 
   character filename*30
 
-  integer, intent(in) :: solver, expnb
-  double precision, intent(in) :: e, gamma_nl
+  integer, intent(in) :: expnb
   
   write (filename, '("output/info.",i2.2)') expnb
   open (10, file = filename, status = 'unknown')
