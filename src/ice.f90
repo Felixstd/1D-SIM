@@ -34,17 +34,16 @@ program ice
     implicit none
 
     logical :: p_flag, restart
-    integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
+    integer :: i, ii, ts, tsini, nstep, tsfin, k, s, idiag, readnamelist
     integer :: out_step(21), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
     integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
-    double precision :: e, rhoair, Cdair, Cdwater
     double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
     double precision :: tauair(1:nx+1)    ! tauair
     double precision :: b(1:nx+1)         ! b vector
     double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1), Cb(1:nx+1)
     double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
     double precision :: meanvalue, time1, time2, timecrap
-    double precision :: L2norm, gamma_nl, nl_target, nbhr
+    double precision :: L2norm, nl_target, nbhr
 
     !-- FSTD --!
     logical :: output_diag

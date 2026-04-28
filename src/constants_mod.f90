@@ -6,7 +6,7 @@ MODULE rheology
 ! kt: for tensile strength, T = kt x P
   IMPLICIT NONE
   DOUBLE PRECISION :: C, Pstar, alpha, alpha2, kt
-  DOUBLE PRECISION :: e_2, small2, denomin_P
+  DOUBLE PRECISION :: e, e_2, small2, denomin_P
 
 END MODULE rheology
 
@@ -44,6 +44,7 @@ MODULE forcing
 
   IMPLICIT NONE
   DOUBLE PRECISION :: Cda, Cdw, small1, uwind
+  double precision :: rhoair, Cdair, Cdwater
 
 END MODULE forcing
 
@@ -60,8 +61,9 @@ MODULE numerical
 
   IMPLICIT NONE
   INTEGER :: N_sub, maxiteSOR, maxiteGMRES, iteSOR_pre
+  INTEGER :: Nmax_OL, solver
   DOUBLE PRECISION :: T, smallA
-  DOUBLE PRECISION :: omega, tol_SOR, dropini
+  DOUBLE PRECISION :: omega, tol_SOR, dropini, gamma_nl
 
 END MODULE numerical
 
