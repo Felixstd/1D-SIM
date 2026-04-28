@@ -13,9 +13,15 @@ output_Stab_VP_GC_1/*
 #-Figures 
 Experiments/*
 Experiments_Old/*
+Experiments_BInt_Ref/*
 
 #-Saved data for figures
 sim1dplotting/outputs_VP/*
 sim1dplotting/Num_Visc_Plas/*
 sim1dplotting/SavedExperiments/*
+
+#- Hidden files for vscode
+.vscode 
+.fortls
+
 
