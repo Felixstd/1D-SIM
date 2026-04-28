@@ -165,13 +165,6 @@ end subroutine stab_condition
 !     diagnostic for ice-ocean stress
 !****************************************************************************
 
-MODULE diag_stress
-
-IMPLICIT NONE
-
-  DOUBLE PRECISION :: tauaidiag, tauiwdiag, tauwidiag
-  
-END MODULE diag_stress
 
 subroutine calc_diag_stress (idiag, utp, Cw, tauair)
   use size

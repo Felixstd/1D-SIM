@@ -10,6 +10,7 @@ BUILDDIR = build
 SRC = src/parameter_mod.f90 \
       src/constants_mod.f90 \
       src/option_mod.f90 \
+      src/diag_stress_mod.f90 \
       src/global_var_mod.f90 \
       src/shallow_water_mod.f90 \
       src/ini_get.f90 \

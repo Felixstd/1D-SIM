@@ -29,6 +29,7 @@ program ice
     use MOMeqSW_output
     use numerical
     use option
+    use diag_stress
   
     implicit none
 
