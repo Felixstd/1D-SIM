@@ -37,6 +37,7 @@ SRC = src/parameter_mod.f90 \
       src/mu_phi.f90 \
       src/energy_dissipation.f90 \
       src/mechanical_energy.f90 \
+      src/par_get.f90 \
       src/ice.f90
 
 ice: $(BUILDDIR) $(SRC)
