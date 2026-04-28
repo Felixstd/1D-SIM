@@ -421,7 +421,7 @@ program ice
      
             call viscouscoefficient (u, zeta, eta) ! u is u^k-1
             call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
-            call EVP2solver(tauair, u, ts, solver)
+            call EVP2solver(tauair, u, ts)
      
         endif
 

@@ -2,7 +2,7 @@
 ! EVP solver in 1D. Author JF Lemieux 8 jan 2014.
 !****************************************************************************
 
-subroutine EVP2solver (tauair, utp, ts, solver)
+subroutine EVP2solver (tauair, utp, ts)
   use size
   use resolution
   use properties
@@ -14,7 +14,7 @@ subroutine EVP2solver (tauair, utp, ts, solver)
   implicit none
       
   integer :: i, s
-  integer, intent(in) :: ts, solver
+  integer, intent(in) :: ts
   double precision, intent(in)  :: tauair(1:nx+1)
   double precision, intent(inout) :: utp(1:nx+1)
   double precision :: Cw(1:nx+1), Cb(1:nx+1), F_uk1(1:nx+1), R_uk1(1:nx+1), un1tp(1:nx+1)
