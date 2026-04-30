@@ -46,7 +46,12 @@ make clean
 
 ## Setup
  
-Edit `run_1dsim.sh` to set the experiment number and target directory. The script will automatically create the experiment folder if it does not already exist, and copy `ice.f90` into it.
+Edit `run_1dsim.sh` to set the experiment number and target directory.
+
+Change also the experiment number in `input_1dsim`. You can also choose to read the namelist `namelistSIM` or go with the default parameters. The option for restart can also be set to `.true.` in this file. 
+
+The script will automatically create the experiment folder if it does not already exist, and copy the namelist into it.
+
  
 ## Running
  
