@@ -63,9 +63,7 @@ subroutine get_default
 
     Nmax_OL    = 1000
 
-    T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
     N_sub = 900
-    Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
 
     omega      = 1d0    ! relax parameter for SOR
     tol_SOR    = 1d-10  ! tol for SOR solver
