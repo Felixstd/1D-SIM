@@ -1,0 +1,46 @@
+&option_nml
+    rheo           =  1
+    linear_drag    =  .false.                                   
+    linear_viscous =  .false.
+    constant_wind  =  .true.
+    rampupwind     =  .false.         
+    uwind          =  10d0
+    rep_closure    =  .false.
+    regularization =  'capping'
+    adv_scheme     =  'upwind'
+    oceanSIM       =  .false.
+    implicitDrag   =  .false.
+    Asselin        =  .false.
+    DiagStress     =  .false.
+    solver         =  1
+    IMEX           =  0
+    BDF2           =  0
+    initcond       =  'stepsmooth'
+    initcond_vel   =  'Graysmooth'
+    mechenergy     =  .true.
+    advection_mom  =  .false.
+    Pstart_change  =  .true.
+    P0_constant    =  .true.
+/
+
+&numerical_param_nml
+    Deltat     = 0.1
+    T_tot      = 30000
+    Agamma     = 1d-02
+    gamma_nl   = 1d-04
+    Nmax_OL    = 500
+    tol_SOR    = 1d-10
+    maxiteSOR  = 10000
+/
+
+&phys_param_nml
+    Pstar    = 27.5d03
+    C        = 20d0
+    e        = 2d0
+    rhoair   = 1.3d0
+    rho      = 900d0 
+    rhowater = 1026d0
+    Cdair    = 0d0
+    Cdwater  = 5.5d-30
+    zeta_max = 1d9
+/

@@ -85,7 +85,10 @@ program ice
 !     Default settings and parameters
 !------------------------------------------------------------------------
 
-    call get_default          
+    call get_default    
+    if (readnamelist .eq. 1) then
+        call read_namelist      ! overwrite default based on namelist
+    endif      
 
 !------------------------------------------------------------------------
 !     Default settings and parameters
