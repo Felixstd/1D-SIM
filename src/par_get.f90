@@ -151,3 +151,76 @@ subroutine get_default
     eta_max    = 1d9
 
 end subroutine get_default
+
+
+subroutine read_namelist 
+
+    use size
+    use rheology
+    use muphi
+    use forcing
+    use properties
+    use resolution
+    use global_var
+    use shallow_water
+    use numerical
+    use option
+
+    implicit none
+
+    
+    integer :: nml_error, filenb
+    character filename*32
+
+    !---- namelist variables -------
+            
+    namelist /option_nml/ &
+        rheo, linear_drag,                                        &
+        linear_viscous, constant_wind, rampupwind,                &
+        uwind, rep_closure, regularization, adv_scheme, oceanSIM, &
+        implicitDrag, Asselin, DiagStress,  solver, IMEX, BDF2,   &
+        initcond, initcond_vel, mechenergy, advection_mom, Pstart_change, &
+        P0_constant
+  
+
+    namelist /numerical_param_nml/ &
+        Deltat, T_tot, Agamma, gamma_nl, Nmax_OL, tol_SOR, maxiteSOR
+
+    namelist /phys_param_nml/ &
+        Pstar, C, e, rhoair, rho, rhowater, &
+        Cdair, Cdwater, zeta_max
+
+    filename ='namelistSIM'
+    filenb = 10
+
+    print *, 'Reading namelist values'
+    
+    open (filenb, file=filename, status='old',iostat=nml_error)
+    if (nml_error /= 0) then
+        nml_error = -1
+    else
+        nml_error =  1
+    endif
+        
+    do while (nml_error > 0)
+        print*,'Reading option_nml'
+        read(filenb, nml=option_nml,iostat=nml_error)
+        if (nml_error /= 0) exit
+        print*,'Reading other_nml'
+        read(filenb, nml=numerical_param_nml,iostat=nml_error)
+        if (nml_error /= 0) exit
+        print*,'Reading phys_param_nml'
+        read(filenb, nml=phys_param_nml,iostat=nml_error)
+        print *, nml_error
+    enddo
+
+    close(filenb)
+
+    e_2        = 1/(e**2d0)   !
+    alpha      = sqrt(1d0 + e_2)
+    alpha2     = 1d0 + e_2
+
+    Cda        = rhoair   * Cdair
+    Cdw        = rhowater * Cdwater
+
+end subroutine read_namelist
