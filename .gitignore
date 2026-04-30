@@ -24,4 +24,6 @@ sim1dplotting/SavedExperiments/*
 .vscode 
 .fortls
 
-
+#- Python cache 
+/__pycache__/*
+*.pyc
