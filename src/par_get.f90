@@ -52,6 +52,7 @@ subroutine get_default
     mechenergy     = .false.      ! compute the power dissipations
     advection_mom  = .false.      ! advection term in solver
     Pstart_change  = .false.      ! new P parametrization
+    P0_constant    = .false.
 
 
     !---------------------------------------------------------
