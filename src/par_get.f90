@@ -98,7 +98,13 @@ subroutine get_default
         Deltax   =  500
     elseif  ( nx .eq. 2000 ) then
         Deltax   =  250
-
+    elseif  ( nx .eq. 4000 ) then
+        Deltax   =  125
+    elseif  ( nx .eq. 5000 ) then
+        Deltax   =  100
+    elseif  ( nx .eq. 8000 ) then
+        Deltax   =  62.5d0
+    
     else
         print *,  'Wrong grid size dimension', nx
         STOP
