@@ -108,12 +108,7 @@ subroutine SOR (b, utp, un1, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
                 B1 = B1 - (rho/(2*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*un1(i)
             endif
 
-         ! if (D(i) .lt. 10d-10) then
-         !    residual = 0d0
-         ! else
-         ! ! print*, D(i)
             residual = B1/D(i) - utp(i)
-         ! endif
             utp(i) = utp(i) + omega * residual
 
             if (.not. p_flag) then

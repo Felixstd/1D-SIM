@@ -125,8 +125,6 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
 			elseif ( regularization .eq. 'capping' ) then
       
-				deno = max((alpha*sqrt( (dudx)**2d0)), denomin)
-        		! zeta(i) = (Pp_half(i)+Tp_half(i)) / deno
 
         		zeta(i) = min(Pp_half(i)/(alpha*sqrt( (dudx)**2d0+small2)), zeta_max)
 

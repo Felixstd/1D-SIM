@@ -194,7 +194,6 @@ program ice
     nbhr = 0d0
     fgmres_per_ts = 0
 
-!   print*, u
     count = 1
     do ts = tsini, tsfin
      
@@ -270,7 +269,6 @@ program ice
                 call Fu (u, un1, un2, h, R_uk1, F_uk1) 
 
                 L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
-                ! print*, L2norm
          
                 if (k .eq. 1) then  
                     nl_target = gamma_nl*L2norm

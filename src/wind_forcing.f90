@@ -30,7 +30,6 @@ subroutine wind_forcing (tauair, ts)
          !  tauair(i) = 0d0
 !	tauair(i) = (Cda * abs(uwind)*uwind)*(1d0-exp(-1d0*ts*Deltat/apar)) ! at n       
        enddo
-!       print *, 'tauair', ts, 100d0*tauair(50)/(Cda * abs(uwind)*uwind)
 
       
       elseif (rampupwind) then
