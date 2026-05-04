@@ -436,13 +436,12 @@ def plot_mechanical_energy(dates, datadict_energy, Parameters, figdir, expno):
     plt.close()
     
     
-def plot_initial_conditions(A_tot, h_tot, u_tot, Parameters, figdir, expno):
+def plot_initial_conditions(A_tot, h_tot, u_tot, X, figdir, expno):
     
     		#----- Initial Conditions ------#
     A_init = A_tot[0]
     h_init = h_tot[0]
     u_init = u_tot[0]
-    X = np.arange(0, Parameters.Nx)*Parameters.dx/1e3
     plt.figure()
     ax1 = plt.axes()
     ax2 = ax1.twinx()
