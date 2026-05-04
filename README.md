@@ -55,8 +55,19 @@ The script will automatically create the experiment folder if it does not alread
  
 ## Running
  
-To launch the simulation, run:
- 
+To launch the simulation, you have two options:
+
+ ### Option 1
 ```bash
 ./run_1dsim.sh
-``` 
+```
+Which will create a directory for you in a specified path to store the experiment namelist and other files related to this experiment. 
+
+### Option 2
+```bash
+./zoupa < input_1dsim > 'output_file' 
+```
+Which will run the model in the main directory and place the log file in it. 
+
+
+
