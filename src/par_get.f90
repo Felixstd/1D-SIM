@@ -87,7 +87,7 @@ subroutine get_default
     elseif (nx .eq. 50) then 
         Deltax = 10d03
     elseif  ( nx .eq. 200 ) then
-        Deltax   =  1            
+        Deltax   =  2500            
     elseif  ( nx .eq. 500 ) then
         Deltax   =  1000
     elseif  ( nx .eq. 625 ) then
