@@ -24,8 +24,8 @@ class namelist:
         self.mu0        = float(configuration_rheo['mu0'])
         self.muinf      = float(configuration_rheo['muinf'])
         self.mub        = [float(x) for x in configuration_rheo['mub'].split(',')]
-        self.dx         = float(configuration_rheo['dx'])*1e3
-        self.Nx         = float(configuration_rheo['Nx'])
+        self.dx         = [float(x) for x in configuration_rheo['dx'].split(',')]
+        self.Nx         = [float(x) for x in configuration_rheo['Nx'].split(',')]
         self.adv        = int(configuration_rheo['advection_scheme'])
         self.imex       = int(configuration_rheo['IMEX'])
         self.solv       = int(configuration_rheo['solver'])
