@@ -23,15 +23,17 @@ subroutine ice_strength ( hin, Ain, uin)
 
 			dudx = ( uin(i+1) - uin(i) ) / Deltax
 
-      deno = alpha*sqrt( (dudx)**2d0 ) ! small2 is there to avoid div by zero
+      ! deno = alpha*sqrt( (dudx)**2d0 ) ! small2 is there to avoid div by zero
+      deno = alpha2*(dudx)**2d0
 
       if (P0_constant) then 
-        P0 = rho_prime*ge
+        P0 = rho_prime*ge*20d0
       else
         P0 = rho_prime*ge*hin(i)
       endif
 
-      Pstar_prime(i) = P0 + (Pstar - P0)*tanh(deno/denomin_P)
+      Pstar_prime(i) = P0 + (Pstar - P0)*tanh(deno/sqrt(deno+denomin_P**2d0))
+      ! Pstar_prime(i) = P0 + (Pstar - P0)*tanh(deno/denomin_P)
     enddo
   
   else  
