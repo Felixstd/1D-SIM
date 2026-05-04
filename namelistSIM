@@ -43,4 +43,5 @@
     Cdair    = 0d0
     Cdwater  = 5.5d-30
     zeta_max = 1d9
+    denomin_P = 2e-4
 /

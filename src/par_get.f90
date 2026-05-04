@@ -193,7 +193,7 @@ subroutine read_namelist
 
     namelist /phys_param_nml/ &
         Pstar, C, e, rhoair, rho, rhowater, &
-        Cdair, Cdwater, zeta_max
+        Cdair, Cdwater, zeta_max, denomin_P
 
     filename ='namelistSIM'
     filenb = 10
