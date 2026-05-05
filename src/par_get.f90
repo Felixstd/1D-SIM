@@ -53,6 +53,7 @@ subroutine get_default
     advection_mom  = .false.      ! advection term in solver
     Pstart_change  = .false.      ! new P parametrization
     P0_constant    = .false.
+    nonlocal       = .false.
 
 
     !---------------------------------------------------------
@@ -127,6 +128,9 @@ subroutine get_default
     alpha2     = 1d0 + e_2
     kt         = 0d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
 
+    l_scale   = Deltax
+    l_scale2  = l_scale**2d0
+
     Cdwater    = 5.5d-30! water-ice drag coeffient
     Cdair      = 0d0    ! air-ice drag coeffient 
     Cdairw     = 0d0    ! air-water drag coeffient  
@@ -185,7 +189,7 @@ subroutine read_namelist
         uwind, rep_closure, regularization, adv_scheme, oceanSIM, &
         implicitDrag, Asselin, DiagStress,  solver, IMEX, BDF2,   &
         initcond, initcond_vel, mechenergy, advection_mom, Pstart_change, &
-        P0_constant
+        P0_constant, nonlocal
   
 
     namelist /numerical_param_nml/ &
@@ -193,7 +197,7 @@ subroutine read_namelist
 
     namelist /phys_param_nml/ &
         Pstar, C, e, rhoair, rho, rhowater, &
-        Cdair, Cdwater, zeta_max, denomin_P
+        Cdair, Cdwater, zeta_max, denomin_P, l_scale
 
     filename ='namelistSIM'
     filenb = 10
@@ -224,6 +228,8 @@ subroutine read_namelist
     e_2        = 1/(e**2d0)   !
     alpha      = sqrt(1d0 + e_2)
     alpha2     = 1d0 + e_2
+
+    l_scale2 = l_scale**2d0
 
     Cda        = rhoair   * Cdair
     Cdw        = rhowater * Cdwater
