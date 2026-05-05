@@ -7,6 +7,7 @@ MODULE rheology
   IMPLICIT NONE
   DOUBLE PRECISION :: C, Pstar, alpha, alpha2, kt
   DOUBLE PRECISION :: e, e_2, small2, denomin_P
+  DOUBLE PRECISION :: l_scale, l_scale2
 
 END MODULE rheology
 
