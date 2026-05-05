@@ -25,6 +25,7 @@ SRC = src/parameter_mod.f90 \
       src/prep_fgmres_NK.f90 \
       src/identity.f90 \
       src/Jacobian.f90 \
+      src/laplacian.f90 \
       src/fgmresD.f90 \
       src/dcopy.f90 \
       src/ddot.f90 \
