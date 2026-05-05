@@ -60,76 +60,87 @@ end subroutine Fu
 !****************************************************************************
 
 subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
-  use size
-  use resolution
-  use properties
-  use numerical
-  use global_var
-  use shallow_water
-  use option
+     use size
+     use resolution
+     use properties
+     use numerical
+     use global_var
+     use shallow_water
+     use option
+     use rheology
 
-  implicit none
-      
-  integer :: i
+     implicit none
+          
+     integer :: i
 
-  double precision, intent(in)  :: utp(1:nx+1)
-  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), tauair(1:nx+1)
+     double precision, intent(in)  :: utp(1:nx+1)
+     double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
+     double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), tauair(1:nx+1)
 
-  double precision, intent(out) :: R_vec(1:nx+1)
-  double precision :: a_at_u, h_at_u
-   
-  R_vec(1)    = 0d0
-  R_vec(nx)   = 0d0
-  R_vec(nx+1) = 0d0
-
-  do i = 2, nx
-
-     R_vec(i) = 0.0d0
-     a_at_u = ( A(i) + A(i-1) ) / 2d0
-     a_at_u=max(a_at_u, smallA)
-     h_at_u = ( h(i) + h(i-1) ) / 2d0
+     double precision, intent(out) :: R_vec(1:nx+1)
+     double precision :: a_at_u, h_at_u
+     double precision  :: lap_P_half(1:nx+1)
      
-!------------------------------------------------------------------------
-!     tauair : air drag term
-!------------------------------------------------------------------------
+     R_vec(1)    = 0d0
+     R_vec(nx)   = 0d0
+     R_vec(nx+1) = 0d0
 
-     R_vec(i) = R_vec(i) !+ a_at_u*tauair(i)
+     if (nonlocal) then 
+          call laplacian(2d0*P_half, lap_P_half)
+     endif
 
-!------------------------------------------------------------------------
-!     Cw*u : water drag term
-!------------------------------------------------------------------------
-     
-! !     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uw(i) )
-     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
-!                                                                ! with NEMO
-!------------------------------------------------------------------------
-!     Cb*u : bottom drag
-!------------------------------------------------------------------------
-     ! 
-     R_vec(i) = R_vec(i) !- Cb(i) * utp(i)
-     
-!------------------------------------------------------------------------
-!     -rhoh detaw/dx : ocean tilt term 
-!------------------------------------------------------------------------
-     
-     R_vec(i) = R_vec(i) !- rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
-     
-!------------------------------------------------------------------------
-!     d ( (zeta+eta) du/dx ) / dx - 1/2dP/dx : rheology term
-!------------------------------------------------------------------------
 
-     R_vec(i) = R_vec(i) + &
+     do i = 2, nx
 
-          (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 - &
-          (zeta(i-1)+eta(i-1)) * (utp(i)-utp(i-1)) / Deltax2
-     
+          R_vec(i) = 0.0d0
+          a_at_u = ( A(i) + A(i-1) ) / 2d0
+          a_at_u=max(a_at_u, smallA)
+          h_at_u = ( h(i) + h(i-1) ) / 2d0
+          
+     !------------------------------------------------------------------------
+     !     tauair : air drag term
+     !------------------------------------------------------------------------
 
-     R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
+          R_vec(i) = R_vec(i) !+ a_at_u*tauair(i)
 
-     ! if (advection_mom) then  
-     !      R_vec(i) = R_vec(i) - (rho/(2d0*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
-     ! endif
+     !------------------------------------------------------------------------
+     !     Cw*u : water drag term
+     !------------------------------------------------------------------------
+          
+     ! !     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uw(i) )
+          R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
+     !                                                                ! with NEMO
+     !------------------------------------------------------------------------
+     !     Cb*u : bottom drag
+     !------------------------------------------------------------------------
+          ! 
+          R_vec(i) = R_vec(i) !- Cb(i) * utp(i)
+          
+     !------------------------------------------------------------------------
+     !     -rhoh detaw/dx : ocean tilt term 
+     !------------------------------------------------------------------------
+          
+          R_vec(i) = R_vec(i) !- rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
+          
+     !------------------------------------------------------------------------
+     !     d ( (zeta+eta) du/dx ) / dx - 1/2dP/dx : rheology term
+     !------------------------------------------------------------------------
+
+          R_vec(i) = R_vec(i) + &
+
+               (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 - &
+               (zeta(i-1)+eta(i-1)) * (utp(i)-utp(i-1)) / Deltax2
+          
+
+          R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
+
+          if (nonlocal) then 
+               R_vec(i) = R_vec(i) + l_scale2*( lap_P_half(i) - lap_P_half(i-1) ) / Deltax
+          endif
+
+          ! if (advection_mom) then  
+          !      R_vec(i) = R_vec(i) - (rho/(2d0*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
+          ! endif
      
      
   enddo
