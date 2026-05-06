@@ -110,6 +110,8 @@ for ind, exp in enumerate(Parameters.expno):
 
 #---------- Plotting ----------#
 	if Parameters.plotsingle:
+     
+		plot.plot_initial_conditions(data["A"], data["h"], data["u"], data["x"]/1e3, Parameters.figdir+str(exp)+'/', exp)
     
 		plot.plot_individual_time(tstep, 
                             		exp, 
