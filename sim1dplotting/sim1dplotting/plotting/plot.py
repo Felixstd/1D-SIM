@@ -54,16 +54,26 @@ def histograms(ax, var, mu0, mu_infty,varname, I = False, I_0 = 0):
         
 def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty, Parameters, Dissipation = False):
     
-        
-    if Parameters.dissipation and Parameters.GC:
-        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot, P_tot, muI_tot = data_dict.values()
-    elif Parameters.GC and Parameters.dissipation == False:
-        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, P_tot, muI_tot = data_dict.values()
-    elif Parameters.GC == False and Parameters.dissipation == True:
-        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot= data_dict.values()
-    else:
-        divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot = data_dict.values()
+
+    divergence_tot = data_dict['divergence_dates']
+    h_tot          = data_dict['h_dates']
+    A_tot          = data_dict['A_dates']
+    u_tot          = data_dict['u_dates']
+    sigma_tot      = data_dict['sigma_dates']
+    sigma_norm_tot = data_dict['signorm_dates']
+    zeta_tot       = data_dict['zeta_dates']
+    eta_tot        = data_dict['eta_dates']
     
+    if Parameters.GC:
+        P_tot   = data_dict['P_dates']
+        muI_tot = data_dict['muI_dates'] 
+        
+    if Parameters.dissipation:
+        Wdissip_tot = data_dict['Wsigma_dates']
+    
+    if Parameters.strength:
+        P_tot = data_dict['P_dates']
+        
         
     Nx = np.shape(divergence_tot)[1]
     X = np.arange(0, Nx)*dx/1e3
