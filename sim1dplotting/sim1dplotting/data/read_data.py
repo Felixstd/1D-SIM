@@ -138,7 +138,7 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir,
     if Energy:
         return data_dict_base, data_dict_energy
     else: 
-        return data_dict_base
+        return data_dict_base, None
 
 def read_maxvelocities(namefile):
     """
