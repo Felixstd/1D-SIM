@@ -66,13 +66,13 @@ for ind, exp in enumerate(Parameters.expno):
 
 
 		if Parameters.savevar:
-			datadict_saved = datadict.copy()
+			datadict_saved = data['base'].copy()
 			datadict_saved['timestep'] = float(Parameters.dt)
 			datadict_saved['resolution'] = float(Parameters.dx[ind]/1e3)
 			datadict_saved['dates'] = dates_time
-			datadict_saved['Number_Regimes'] = [number_viscous, number_plastic, number_mixed_viszeta, number_mixed_viseta]
+			# datadict_saved['Number_Regimes'] = [number_viscous, number_plastic, number_mixed_viszeta, number_mixed_viseta]
 			np.save('SavedExperiments/datadict_exp_{}.npy'.format(exp), datadict_saved)
-			datadict_energy_saved = datadict_energy_Tavg.copy()
+			datadict_energy_saved = data['energy_avg'].copy()
 			np.save('SavedExperiments/datadict_energy_saved_{}.npy'.format(exp), datadict_energy_saved)
 
 	if Parameters.maxvelocities:
@@ -89,7 +89,7 @@ for ind, exp in enumerate(Parameters.expno):
 		plot.plot_variable(Parameters.dx[ind], 
 							Parameters.dt,
 							tstep, 
-							np.array(A_tot), 
+							np.array(data["A"]), 
 							r'$A$', 
 							colors.SymLogNorm(vmin=0, vmax=1, linthresh=0.1), 
 							cm.cm.ice, 
@@ -99,7 +99,7 @@ for ind, exp in enumerate(Parameters.expno):
 		plot.plot_variable(Parameters.dx[ind], 
 							Parameters.dt,
 							tstep, 
-							np.array(h_tot), 
+							np.array(data["h"]), 
 							r'$h$ (m)', 
 							colors.SymLogNorm(vmin=0, vmax=1, linthresh=0.1), 
 							cm.cm.ice, 
@@ -113,7 +113,7 @@ for ind, exp in enumerate(Parameters.expno):
     
 		plot.plot_individual_time(tstep, 
                             		exp, 
-                              		datadict, 
+                              		data["base"], 
                                 	Parameters.dx[ind],
                                  	Parameters.dt,
 									Parameters.figdir+str(exp)+'/', 
@@ -125,12 +125,12 @@ for ind, exp in enumerate(Parameters.expno):
 		if Parameters.mechanical_energy:
 			plot.plot_mechanical_energy(
                             tstep, 
-                            datadict_energy, 
+                            data["energy"], 
                             Parameters, 
                             Parameters.figdir+str(exp)+'/', 
                             exp
                             )
-			plot.plot_energy(datadict_energy_Tavg,number_plastic, number_viscous, number_mixed_viszeta, number_mixed_viseta, Parameters, Parameters.figdir+str(exp)+'/')
+			# plot.plot_energy(datadict_energy_Tavg,number_plastic, number_viscous, number_mixed_viszeta, number_mixed_viseta, Parameters, Parameters.figdir+str(exp)+'/')
 			
 
    
