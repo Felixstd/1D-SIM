@@ -19,7 +19,9 @@ def load_data(data_dict, files_info, date, expno, dt, dx, solv, IMEX, adv,output
         # return data_dict
 
 
-def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = False, Energy = False, GC = False):
+def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, 
+              Dissipation = False, Energy = False, GC = False, 
+              strength = False):
     """
     This function reads the ouput, for the specified dates and experiment number (expno) from the McGIll-SIM and puts
     them in a dictionnary. 
@@ -50,6 +52,12 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = Fa
         'zeta_dates':[]
 
     }
+    
+    if strength: 
+        data_dict_base.update({
+            'P_dates':[]
+        }
+        )
     
     if Dissipation:
         data_dict_base.update({
@@ -99,7 +107,14 @@ def read_data(expno, dt, dx, solv, IMEX, adv, dates, outputdir, Dissipation = Fa
             for prefix, key in [('Wdissip', 'Wsigma_dates')]:
                 filename = f"{outputdir}{prefix}{'_'}{dt:05}{'s_'}{dx:06}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:09}{'.'}{expno:02d}"
                 data_dict_base[key].append(np.loadtxt(filename, dtype=None))
-                
+
+        if strength: 
+            for prefix, key in [('Pp', 'P_dates')]:
+                filename = f"{outputdir}{prefix}{'_'}{dt:05}{'s_'}{dx:06}{'km_'}{'solv'}{solv}{'_IMEX'}{IMEX}{'_adv'}{adv}{'_BDF20_ts'}{date:09}{'.'}{expno:02d}"
+
+                data_dict_base[key].append(np.loadtxt(filename, dtype=None))
+            
+            
         if GC:
             files_info = [('P', 'P_dates'), 
                           ('Mu', 'muI_dates')]
