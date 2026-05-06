@@ -8,19 +8,20 @@ class namelist:
         #--- Reading the Model Parameters ---#
         
         #------ Experiment ------#
-        self.expno = [int(x) for x in configuration_exp['expno'].split(',')]
-        self.savevar = int(configuration_exp['savevar'])
-        self.plotfields = int(configuration_exp['plot_fields'])
-        self.read_all = int(configuration_exp['read_all'])
-        self.plotsingle = int(configuration_exp['plot_single'])
-        self.plotresidual = int(configuration_exp['residual_analysis'])
-        self.dissipation = int(configuration_exp['energy_dissipation'])
+        self.expno             = [int(x) for x in configuration_exp['expno'].split(',')]
+        self.savevar           = int(configuration_exp['savevar'])
+        self.plotfields        = int(configuration_exp['plot_fields'])
+        self.read_all          = int(configuration_exp['read_all'])
+        self.plotsingle        = int(configuration_exp['plot_single'])
+        self.plotresidual      = int(configuration_exp['residual_analysis'])
+        self.dissipation       = int(configuration_exp['energy_dissipation'])
         self.mechanical_energy = int(configuration_exp['mech_energy'])
-        self.maxvelocities = int(configuration_exp['maxvelocities'])
+        self.maxvelocities     = int(configuration_exp['maxvelocities'])
+        self.strength          = int(configuration_exp['read_strength'])
 
         
         #------ Rheology ------#
-        self.GC      = int(configuration_rheo['GC'])
+        self.GC         = int(configuration_rheo['GC'])
         self.mu0        = float(configuration_rheo['mu0'])
         self.muinf      = float(configuration_rheo['muinf'])
         self.mub        = [float(x) for x in configuration_rheo['mub'].split(',')]

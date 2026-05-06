@@ -7,7 +7,8 @@ plot_single = 1
 residual_analysis = 0
 energy_dissipation = 1
 maxvelocities = 0
-mech_energy = 1
+mech_energy = 0
+read_strength = 1
 
 [Time]
 start_k    = 1
