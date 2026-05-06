@@ -7,6 +7,7 @@ import matplotlib.cm as pltcm
 from sim1dplotting.utils.TimeUtilities import TimeUtility
 from sim1dplotting.data.readnamelist import namelist
 from sim1dplotting.data import read_data
+from sim1dplotting.data import load_data
 from sim1dplotting.plotting import plot
 from sim1dplotting.analysis import analysis
 
@@ -60,83 +61,8 @@ for ind, exp in enumerate(Parameters.expno):
 		os.mkdir(Parameters.figdir+str(exp))
 	
 	if Parameters.read_all: 
-		#---------- READING DATA ----------#
-
-		if Parameters.mechanical_energy:
-			datadict, datadict_energy = read_data.read_data(
-				exp, 
-				int(Parameters.dt_read), 
-				int(Parameters.dx[ind]/1e3), 
-				Parameters.solv, 
-				Parameters.imex, 
-				Parameters.adv, 
-				tstep, 
-				Parameters.outputdir, 
-				Dissipation=Parameters.dissipation, 
-				Energy=Parameters.mechanical_energy, 
-				GC = Parameters.GC
-			)
-
-			datadict_energy_Tavg = read_data.read_avg_energy(
-       			exp, 
-          		int(Parameters.dt_read), 
-            	int(Parameters.dx[ind]/1e3), 
-             	Parameters.solv, 
-              	Parameters.imex, 
-               	Parameters.adv, 
-                Parameters.nstep, 
-                Parameters.outputdir)
-   
-			number_viscous, number_plastic = read_data.read_visc_plas_file('outputs_VP/num_visc_plas_{}.out'.format(exp))
-   
-			number_mixed_viszeta, number_mixed_viseta = read_data.read_visc_plas_file('outputs_VP/num_mixed_visc_plas_{}.out'.format(exp))
-		else:
-			datadict = read_data.read_data(
-				exp, 
-				int(Parameters.dt_read), 
-				int(Parameters.dx[ind]/1e3), 
-				Parameters.solv, 
-				Parameters.imex, 
-				Parameters.adv, 
-				tstep, 
-				Parameters.outputdir, 
-				Dissipation=Parameters.dissipation
-			)
-
-		if Parameters.dx[ind] < 1:
-			if Parameters.Nx[ind] == 627:
-				Parameters.dx[ind] = 800
-			if Parameters.Nx[ind]== 802:
-				Parameters.dx[ind] = 625
-			if Parameters.Nx[ind] == 202:
-				Parameters.dx[ind]= 2500
-    
-			if Parameters.Nx[ind] == 1002:
-				Parameters.dx[ind]= 500
-			if Parameters.Nx[ind] == 2002:
-				Parameters.dx[ind] = 250
-			if Parameters.Nx[ind] == 4002:
-				Parameters.dx[ind] = 125
-			if Parameters.Nx[ind] == 5002:
-				Parameters.dx[ind] = 100
-			if Parameters.Nx[ind] == 8002:
-				Parameters.dx[ind] = 62.5
-    
-		x_exp = np.linspace(0, Parameters.Nx[ind]*Parameters.dx[ind], int(Parameters.Nx[ind]))	
-    
-		if Parameters.dissipation and Parameters.GC:
-			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot, P_tot, muI_tot = datadict.values()
-		elif Parameters.GC and Parameters.dissipation == False:
-			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, P_tot, muI_tot = datadict.values()
-		elif Parameters.GC == False and Parameters.dissipation == True:
-			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot, Wdissip_tot= datadict.values()
-		else:
-			divergence_tot, h_tot, A_tot, u_tot, sigma_tot, sigma_norm_tot, eta_tot, zeta_tot = datadict.values()
-		
-		plot.plot_initial_conditions(A_tot, h_tot, u_tot, x_exp/1e3, Parameters.figdir+str(exp)+'/', exp)
-  
-		A_exps.append(A_tot)
-		x_exps.append(x_exp)
+		 
+		data = load_data.load_experiment_data(Parameters, exp, ind, tstep)
 
 
 		if Parameters.savevar:
