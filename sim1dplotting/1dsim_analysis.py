@@ -32,6 +32,9 @@ Parameters = namelist(configuration_exp  = config_exp['Experiment'],
                       configuration_fig  = config_exp['Figures'], 
                       configuration_time = config_exp['Time'])
 
+Dates_Config = TimeUtility(configuration_time = config_exp['Time'], 
+						   configuration_fig  = config_exp['Figures'])
+
 warnings.filterwarnings("ignore")
 
 # For 1 to 13
@@ -52,11 +55,15 @@ maxvel_exp = []
 
 for ind, exp in enumerate(Parameters.expno): 
 	print('Reading Experiment', exp)
-	Dates_Config = TimeUtility(configuration_time = config_exp['Time'], 
-							  configuration_fig  = config_exp['Figures'])
+ 
+ 
+#--------------------------------------------------------------
+# Reading the time for exp
+#--------------------------------------------------------------
+	print('Reading time')
+ 
 	tstep, dates_time = (TimeUtility.read_time(Dates_Config, expno = exp))
-	print(tstep)
-	tstep = tstep[1:]
+ 
 	if not os.path.isdir(Parameters.figdir+str(exp)):
 		os.mkdir(Parameters.figdir+str(exp))
 	
