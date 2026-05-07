@@ -42,34 +42,17 @@ subroutine ice_strength ( hin, Ain, uin)
     enddo
   endif
 
-  if (rheo .eq. 1) then
 
-    Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
-    Pp_half(nx+1) = 0d0
-    Tp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
-    Tp_half(nx+1) = 0d0
+  Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+  Pp_half(nx+1) = 0d0
+  Tp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+  Tp_half(nx+1) = 0d0
 
-    do i = 1, nx
-      Pp_half(i) = 0.5d0 * Pstar_prime(i) * hin(i) * dexp(-C * ( 1d0 - Ain(i) ) )
-      Tp_half(i) = kt*Pp_half(i)
-    enddo
+  do i = 1, nx
+    Pp_half(i) = 0.5d0 * Pstar_prime(i) * hin(i) * dexp(-C * ( 1d0 - Ain(i) ) )
+    Tp_half(i) = kt*Pp_half(i)
+  enddo
   
-  elseif ( rheo .eq. 2 ) then
-    
-    Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
-    Pp_half(nx+1) = 0d0
-    Tp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
-    Tp_half(nx+1) = 0d0
-
-    do i = 1, nx
-      Pp_half(i) = Pstar * hin(i) * dexp(-C * ( 1d0 - Ain(i) ))
-      Tp_half(i) = kt*Pp_half(i)
-      ! Peq(i) = rho * hin(i) * (( d_average * shear_I(i) ) / ( Ain(i) - Phi_0 ))**2 
-
-    enddo
-
-  endif
-    
 
 !------- set p = 0 at open boundaries for proper care of open bc --------------
 !                    see p.1241-1242 for details              
