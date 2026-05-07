@@ -66,6 +66,10 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 			Dx,solver, IMEX, adv,BDF2,ts,expnb
 	open (12, file = filename, status = 'unknown')
 
+  write (filename, '("output/Pp_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
+			Dx,solver,IMEX, adv,BDF2,ts,expnb
+	open (30, file = filename, status = 'unknown')
+
 	write (filename, '("output/div_",i5.5,"s_",i6.6,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i9.9,".",i2.2)') Dt, &
 			Dx,solver, IMEX, adv,BDF2,ts,expnb
 	open (13, file = filename, status = 'unknown')
@@ -146,6 +150,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 	write(12,*) ( utp(i),       i = 1, nx+1 )
 	write(18,*) ( Erate(i),     i = 1, nx+1 )
 	write(20,*) ( W_sigma(i),     i = 0, nx+1 )
+  write(30,*) ( Pp_half(i),     i = 0, nx+1 )
 
 	if (mechenergy) then
 		write(21,*) ( P_pot(i),       i = 1, nx+1 )
