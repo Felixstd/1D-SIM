@@ -41,6 +41,7 @@ program ice
     double precision :: tauair(1:nx+1)    ! tauair
     double precision :: b(1:nx+1)         ! b vector
     double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1), Cb(1:nx+1)
+    double precision :: Pice(0:nx+1)
     double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
     double precision :: meanvalue, time1, time2, timecrap
     double precision :: L2norm, nl_target, nbhr
@@ -230,13 +231,16 @@ program ice
         endif
    
         if (IMEX .eq. 0) then
-            
-            if (rheo .eq. 2) then
-                call ice_strength (hn1, An1) ! standard approach no IMEX 
-            else 
-                call ice_strength (hn1, An1, un1) 
+            !Standard approach
+            call ice_strength (hn1, An1, un1) 
+            if (nonlocal) then
+                
+                call solve_helmholtz_P(2d0*Pp_half,An1,Pice)
+                Pp_half = Pice/2d0
+                Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+                Pp_half(nx+1) = 0d0
+
             endif
-        
         endif
 
 !------- get wind forcing (independent of u) -----------------------------
@@ -255,11 +259,14 @@ program ice
         
                 if (IMEX .gt. 0) then ! IMEX method 1 or 2
                     call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
-                    ! call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
-                    ! call shear(un1)
                     call ice_strength (h, A, u) ! standard approach no IMEX 
-                    ! call inertial_number()
-                    ! call angle_friction_mu()
+                    
+                    if (nonlocal) then
+                        call solve_helmholtz_P(2d0*Pp_half,An1,Pice)
+                        Pp_half = Pice/2d0
+                        Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+                        Pp_half(nx+1) = 0d0
+                    endif
                 endif
 
 
