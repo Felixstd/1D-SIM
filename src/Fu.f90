@@ -85,9 +85,6 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
      R_vec(nx)   = 0d0
      R_vec(nx+1) = 0d0
 
-     if (nonlocal) then 
-          call laplacian(2d0*P_half, lap_P_half)
-     endif
 
 
      do i = 2, nx
@@ -134,9 +131,6 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
 
           R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
 
-          if (nonlocal) then 
-               R_vec(i) = R_vec(i) + l_scale2*( lap_P_half(i) - lap_P_half(i-1) ) / Deltax
-          endif
 
           ! if (advection_mom) then  
           !      R_vec(i) = R_vec(i) - (rho/(2d0*Deltax))*(h_at_u)*(utp(i+1) - utp(i-1))*utp(i)
