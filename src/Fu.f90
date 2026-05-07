@@ -101,7 +101,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
      !     tauair : air drag term
      !------------------------------------------------------------------------
 
-          R_vec(i) = R_vec(i) !+ a_at_u*tauair(i)
+          R_vec(i) = R_vec(i) + a_at_u*tauair(i)
 
      !------------------------------------------------------------------------
      !     Cw*u : water drag term
