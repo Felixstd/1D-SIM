@@ -27,7 +27,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
   character(LEN=30) filename  ! restart file name 
 
   small = 0.0001d0
-  eps = 100 !controls sharpness of the transition
+  eps = 20000 !controls sharpness of the transition
 
   allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
   allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
@@ -155,34 +155,20 @@ subroutine ini_get (utp, restart, expres, ts_res)
          endif
 
       elseif (initcond_vel .eq. 'Graysmooth') then
-         ! ramp = (i - nx/2d0) / 1e2
-         
-         ! window = 1 / (1 + exp((abs(ramp) - 0.8)/eps))
-         ! utp(i) = ramp*window/1000
 
          L = nx* Deltax
          x = (i-1) * Deltax
-         ramp = (x - L/2) / 1e2
-         window = 1 / (1 + exp((abs(ramp) - 800)/eps))
-         utp(i) = ramp*window/1000000
-      
+         ramp = (x - L/2)
+         window = 0.5 * (tanh((ramp + 80e3)/eps) - tanh((ramp - 80e3)/eps))
+         utp(i) = (ramp/1d8)*window
+
       elseif (initcond_vel .eq. 'GraysmoothConv') then
          
-         
-         ! if (nx .eq. 1000) then  
-         !    ramp = -(i - nx/2d0)
-         !    window = 1 / (1 + exp((abs(ramp) - nx/6d0)/2d0))
-         !    utp(i) = ramp*window/1d4
          L = nx* Deltax
          x = (i-1) * Deltax
-         ramp = - (x - L/2) / 1e2
-         window = 1 / (1 + exp((abs(ramp) - 800)/eps))
-         utp(i) = ramp*window/10000
-         ! else 
-            ! ramp = -(i - nx/2d0)/ 1e2
-            ! window = 1 / (1 + exp((abs(ramp) - 1)/eps))
-            ! utp(i) = ramp*window/10
-         ! endif
+         ramp = (x - L/2)
+         window = 0.5 * (tanh((ramp + 80e3)/eps) - tanh((ramp - 80e3)/eps))
+         utp(i) = -(ramp/1d8)*window
       
       elseif (initcond_vel .eq. 'parabolaConv') then 
          w = 10d0
