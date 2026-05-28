@@ -28,8 +28,13 @@ subroutine wind_forcing (tauair, ts)
       do i = 2, nx ! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
          tauair(i) = Cda * abs(uwind)*uwind
       enddo
-
+   
+   elseif (diverging_winds) then 
       
+      do i = 2, nx! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
+         tauair(i) = Cda * abs(uwind) * tanh(real((i - nx/2)) / (nx/2))*uwind
+      enddo
+
    elseif (rampupwind) then
 
       Tramp = 60*60*2

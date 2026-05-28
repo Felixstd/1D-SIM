@@ -29,6 +29,7 @@ subroutine get_default
     linear_drag    = .false.
     linear_viscous = .false. ! linear viscous instead of viscous-plastic
     constant_wind  = .true.  ! T: 10m/s, F: spat and temp varying winds
+    diverging_winds = .false.
     rampupwind     = .false.
     uwind          = 10d0    ! uwind velocity for constant_wind
     rep_closure    = .false. ! replacement closure (see Kreysher et al. 2000)
@@ -185,7 +186,7 @@ subroutine read_namelist
             
     namelist /option_nml/ &
         rheo, linear_drag,                                        &
-        linear_viscous, constant_wind, rampupwind,                &
+        linear_viscous, constant_wind, diverging_winds, rampupwind,&
         uwind, rep_closure, regularization, adv_scheme, oceanSIM, &
         implicitDrag, Asselin, DiagStress,  solver, IMEX, BDF2,   &
         initcond, initcond_vel, mechenergy, advection_mom, Pstart_change, &
