@@ -68,7 +68,8 @@ subroutine get_default
 
     N_sub = 900
 
-    omega      = 1d0    ! relax parameter for SOR
+    omega      = 1.5d0    ! relax parameter for SOR
+    ! omega      = 1d0    ! relax parameter for SOR
     tol_SOR    = 1d-10  ! tol for SOR solver
     maxiteSOR  = 10000  ! max nb of ite for SOR
     iteSOR_pre = 10     ! nb of iterations for the SOR precond
