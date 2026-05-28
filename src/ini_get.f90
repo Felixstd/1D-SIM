@@ -78,7 +78,6 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   do i = 1, nx
 
-      ! if (nx .eq. 400) then
       if ((initcond_vel .eq. 'GraysmoothConv') .and. (initcond .eq. 'stepsmooth')) then 
          A(i) = min(max(tanh((real(i)-real(nx)/3)/0.0000001**(-0.1)) &
                      - tanh((real(i)-2*real(nx)/3)/0.0000001**(-0.1)), 0d0)/5, 1d0)
@@ -88,13 +87,11 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
       elseif (initcond .eq. 'step') then
          A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-         ! A(i) = min(max((real(600000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
          if (A(i) .gt. 0d0) then  
             h(i) = 1d0
          endif
 
       elseif (initcond .eq. 'stepsmooth') then
-         ! if (nx .eq. 500) then
             A(i) = min(max(tanh((real(i)-real(nx)/3)/0.0000001**(-0.1)) &
                      - tanh((real(i)-2*real(nx)/3)/0.0000001**(-0.1)), 0d0)/2, 1d0)
             if (A(i) .gt. 0d0) then  
@@ -129,21 +126,9 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
       endif
 
-      
-         
-      ! endif
-
-
-
   enddo
 
     do i = 2, nx
-!     call random_number(rdnb)
-!     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess  
-      ! if (i > nx/2) then
-      ! utp(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)/10d0
-
-      ! utp(i) = 0d0
 
       if (initcond_vel .eq. 'Gray') then 
       
@@ -200,25 +185,6 @@ subroutine ini_get (utp, restart, expres, ts_res)
       elseif (initcond_vel .eq. 'zero') then 
          utp(i) = 0d0
       endif 
-      ! else
-!       if (initcond .eq. 'constants') then 
-
-!          utp(i) = 0.01
-
-!       elseif (initcond .eq. 'step') then 
-! ! 
-!          if (h(i) > 0d0) then
-!             ! utp(i) =  A(i)/100d0
-!             utp(i) =  i/1000d0
-!          else 
-!             utp(i) = 0d0
-!          endif
-      
-!       else 
-!          utp(i) = 0.01d0
-!       endif
-
-      ! utp(i) = 0d0
       
       uw(i)  = 0d0
   enddo
