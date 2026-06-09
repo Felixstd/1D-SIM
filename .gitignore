@@ -23,6 +23,7 @@ sim1dplotting/SavedExperiments/*
 #- Hidden files for vscode
 .vscode 
 .fortls
+.nfs*
 
 #- Python cache 
 /__pycache__/*
