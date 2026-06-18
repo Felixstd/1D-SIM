@@ -18,6 +18,7 @@ subroutine solve_helmholtz_P(P_loc, Ain, P_nl)
     use size
     use resolution
     use rheology
+    use option
     
     implicit none
 
@@ -26,7 +27,7 @@ subroutine solve_helmholtz_P(P_loc, Ain, P_nl)
     double precision, intent(in) :: Ain(0:nx+1)
 
     double precision :: lower(1:nx), main_d(1:nx), upper(1:nx), rhs(1:nx)
-    double precision :: w, Ai
+    double precision :: w, Ai, l_scale2i
     integer :: i
 
     ! Coefficients of l_scale2*d2P/dx2 - P = -P_loc
@@ -37,9 +38,15 @@ subroutine solve_helmholtz_P(P_loc, Ain, P_nl)
 
     do i = 1, nx
         Ai = max(Ain(i),1d-10)
-        lower(i)  =  (l_scale2*Ai**2d0) / Deltax2
-        main_d(i) = -(2d0 * (l_scale2*Ai**2d0) / Deltax2 + 1d0)
-        upper(i)  =  (l_scale2*Ai**2d0) / Deltax2
+
+        if (l_c_exp) then 
+            l_scale2i = l_scale2*exp(-C*(1-Ai))
+        else
+            l_scale2i = (l_scale2*Ai**2d0)
+        endif
+        lower(i)  =  l_scale2i / Deltax2
+        main_d(i) = -(2d0 * l_scale2i / Deltax2 + 1d0)
+        upper(i)  =  l_scale2i / Deltax2
         rhs(i)    = -P_loc(i)
     enddo
 
