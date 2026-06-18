@@ -236,4 +236,7 @@ subroutine read_namelist
     Cda        = rhoair   * Cdair
     Cdw        = rhowater * Cdwater
 
+    Deltax2 = Deltax ** 2
+    DtoverDx = Deltat / Deltax
+
 end subroutine read_namelist
