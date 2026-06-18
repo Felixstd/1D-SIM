@@ -23,6 +23,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
   double precision, intent(inout)  :: utp(1:nx+1)
   double precision :: rdnb, small, ramp, eps, window, x, L
   double precision :: x1, x2, c1, c2, b1, b2, par1, par2, w, g
+  double precision :: sharpness, i_prime
 
   character(LEN=30) filename  ! restart file name 
 
@@ -75,12 +76,13 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   else ! specify initial fields
 
+  sharpness = 0.0000001**(-0.1)
 
   do i = 1, nx
 
       if ((initcond_vel .eq. 'GraysmoothConv') .and. (initcond .eq. 'stepsmooth')) then 
-         A(i) = min(max(tanh((real(i)-real(nx)/3)/0.0000001**(-0.1)) &
-                     - tanh((real(i)-2*real(nx)/3)/0.0000001**(-0.1)), 0d0)/5, 1d0)
+         A(i) = min(max(tanh((real(i)-real(nx)/3)/sharpness) &
+                     - tanh((real(i)-2*real(nx)/3)/sharpness), 0d0)/5, 1d0)
             if (A(i) .gt. 0d0) then  
                h(i) = A(i)
             endif
@@ -92,8 +94,8 @@ subroutine ini_get (utp, restart, expres, ts_res)
          endif
 
       elseif (initcond .eq. 'stepsmooth') then
-            A(i) = min(max(tanh((real(i)-real(nx)/3)/0.0000001**(-0.1)) &
-                     - tanh((real(i)-2*real(nx)/3)/0.0000001**(-0.1)), 0d0)/2, 1d0)
+            A(i) = min(max(tanh((real(i)-real(nx)/3)/sharpness) &
+                     - tanh((real(i)-2*real(nx)/3)/sharpness), 0d0)/2, 1d0)
             if (A(i) .gt. 0d0) then  
                h(i) = A(i)
             endif
