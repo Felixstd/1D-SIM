@@ -53,6 +53,9 @@ subroutine get_default
     mechenergy     = .false.      ! compute the power dissipations
     advection_mom  = .false.      ! advection term in solver
     nonlocal       = .false.
+    steadystate    = .true.
+    pp_linear      = .false.
+    l_c_exp        = .false.
 
 
     !---------------------------------------------------------
