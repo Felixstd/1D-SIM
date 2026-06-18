@@ -41,7 +41,7 @@ program ice
     double precision :: tauair(1:nx+1)    ! tauair
     double precision :: b(1:nx+1)         ! b vector
     double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1), Cb(1:nx+1)
-    double precision :: Pice(0:nx+1)
+    double precision :: Pice(0:nx+1), Pp_half_n1(0:nx+1)
     double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
     double precision :: meanvalue, time1, time2, timecrap
     double precision :: L2norm, nl_target, nbhr
@@ -191,6 +191,8 @@ program ice
     un1=u
     hn1=h
     An1=A
+    call ice_strength(h,A,u)
+    Pp_half_n1 = Pp_half
     tauair = 0d0 ! initialization (watchout for restart)
     nbhr = 0d0
     fgmres_per_ts = 0
@@ -234,11 +236,15 @@ program ice
             !Standard approach
             call ice_strength (hn1, An1, un1) 
             if (nonlocal) then
-                
-                call solve_helmholtz_P(2d0*Pp_half,An1,Pice)
+                if (steadystate) then 
+                    call solve_helmholtz_P(2d0*Pp_half,An1,Pice)
+                else 
+                    call solve_timeHelmholtz_P(2d0*Pp_half_n1,2d0*Pp_half,An1,Pice)
+                endif
                 Pp_half = Pice/2d0
                 Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
                 Pp_half(nx+1) = 0d0
+                Pp_half_n1 = Pp_half
 
             endif
         endif
