@@ -56,7 +56,7 @@ subroutine SOR (b, utp, un1, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !     Cb*u : bottom drag term
 !------------------------------------------------------------------------
 
-        D(i) = D(i)! + Cb(i)      
+        D(i) = D(i) + Cb(i)      
       
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx : rheology term
@@ -64,7 +64,6 @@ subroutine SOR (b, utp, un1, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
      
         D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
         D(i)=scaling(i)*D(i) ! for JFNK
-        ! print*,'D',  D(i)
     enddo
 
     do l = 1, maxiteSOR
