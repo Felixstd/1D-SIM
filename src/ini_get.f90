@@ -100,7 +100,17 @@ subroutine ini_get (utp, restart, expres, ts_res)
                h(i) = A(i)
             endif
 
-      
+      elseif (initcond .eq. 'stepsmoothsym') then 
+            i_prime = (real(i) - (real(nx)+1d0)/2d0)
+            A(i) = min(max(tanh((i_prime+(real(nx)/5d0))/sharpness) &
+                     - tanh((i_prime-(real(nx)/5d0))/sharpness), 0d0)/2, 1d0)
+            
+            if (1d0 - A(i) < 1d-5)  A(i) = 1d0 
+
+            if (A(i) .gt. 0d0) then  
+               h(i) = A(i)
+            endif
+            
       elseif (initcond .eq. 'gaussian') then
          A(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
          h(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
