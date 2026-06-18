@@ -22,7 +22,6 @@ subroutine calc_scaling ( Atp )
      a_at_u=max(a_at_u, smallA)
      scaling(i)=1d0/a_at_u
 
-     print*, 'scaling', scaling(i)
 
   enddo
   
