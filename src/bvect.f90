@@ -12,7 +12,6 @@ subroutine bvect(tauair, un1, Cw, b)
       
   integer :: i
   double precision h_at_u, a_at_u
-  double precision :: lap_P_half(1:nx+1)
   double precision, intent(in) :: tauair(1:nx+1), un1(1:nx+1), Cw(1:nx+1)
   double precision, intent(out):: b(1:nx+1)
 
