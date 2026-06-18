@@ -52,8 +52,6 @@ subroutine get_default
     initcond_vel   = 'Graysmooth' ! initial conditions for u 
     mechenergy     = .false.      ! compute the power dissipations
     advection_mom  = .false.      ! advection term in solver
-    Pstart_change  = .false.      ! new P parametrization
-    P0_constant    = .false.
     nonlocal       = .false.
 
 
@@ -190,8 +188,8 @@ subroutine read_namelist
         linear_viscous, constant_wind, diverging_winds, rampupwind,&
         uwind, rep_closure, regularization, adv_scheme, oceanSIM, &
         implicitDrag, Asselin, DiagStress,  solver, IMEX, BDF2,   &
-        initcond, initcond_vel, mechenergy, advection_mom, Pstart_change, &
-        P0_constant, nonlocal
+        initcond, initcond_vel, mechenergy, advection_mom, &
+        nonlocal,steadystate, pp_linear, l_c_exp
   
 
     namelist /numerical_param_nml/ &
