@@ -133,6 +133,7 @@ subroutine get_default
 
     l_scale   = Deltax
     l_scale2  = l_scale**2d0
+    t_scale   = 2d0*60d0*60d0
 
     Cdwater    = 5.5d-30! water-ice drag coeffient
     Cdair      = 0d0    ! air-ice drag coeffient 
@@ -200,7 +201,7 @@ subroutine read_namelist
 
     namelist /phys_param_nml/ &
         Pstar, C, e, rhoair, rho, rhowater, &
-        Cdair, Cdwater, zeta_max, denomin_P, l_scale
+        Cdair, Cdwater, zeta_max, denomin_P, l_scale, t_scale
 
     filename ='namelistSIM'
     filenb = 10
