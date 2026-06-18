@@ -37,21 +37,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
      allocate(duwdt(1:nx+1), gedetawdx(1:nx+1), buw(1:nx+1))
      allocate(tauiw(1:nx+1), tauaw(1:nx+1))
   endif
-  
-  utp(1)    = 0d0 ! close bc
-  utp(nx)   = 0d0
-  utp(nx+1) = 0d0 ! close bc
-  h(0)    = 0d0
-  h(nx+1) = 0d0
-  A(0)    = 0d0
-  A(nx+1) = 0d0
-  uw      = 0d0
-  uwn1    = 0d0
-  uwn2    = 0d0
-  etaw    = 0d0
-  etawn1  = 0d0
-  etawn2  = 0d0
-  
+
   scaling=1d0 ! initialize scaling field (only used for JFNK)
 
   if (restart) then 
@@ -223,7 +209,21 @@ subroutine ini_get (utp, restart, expres, ts_res)
      tauaw=0d0
      buw=0d0
   endif
-  
+
+   utp(1)    = 0d0 ! close bc
+   ! utp(nx)   = 0d0
+   utp(nx+1) = 0d0 ! close bc
+   h(0)    = 0d0
+   h(nx+1) = 0d0
+   A(0)    = 0d0
+   A(nx+1) = 0d0
+   uw      = 0d0
+   uwn1    = 0d0
+   uwn2    = 0d0
+   etaw    = 0d0
+   etawn1  = 0d0
+   etawn2  = 0d0
+   
 !  do i = 11, nx-10
 !     h(i) = 1d0
 !     A(i) = 0.7d0
