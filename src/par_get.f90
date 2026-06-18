@@ -88,11 +88,13 @@ subroutine get_default
 
     if ( nx .eq. 100 ) then 
         Deltax   =  20d03  ! grid size [m], the domain is always 2000 km 
+    elseif ((nx .eq. 10) .or. (nx .eq. 11)) then 
+        Deltax = 50d03
     elseif (nx .eq. 50) then 
         Deltax = 10d03
-    elseif  ( nx .eq. 200 ) then
+    elseif  (( nx .eq. 200) .or. (nx .eq. 201))then
         Deltax   =  2500            
-    elseif  ( nx .eq. 500 ) then
+    elseif  (( nx .eq. 500 ) .or. (nx .eq. 501)) then
         Deltax   =  1000
     elseif  ( nx .eq. 625 ) then
         Deltax   =  800
