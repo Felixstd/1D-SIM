@@ -140,7 +140,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   enddo
 
-    do i = 2, nx
+    do i = 1, nx
 
       if (initcond_vel .eq. 'Gray') then 
       
@@ -157,7 +157,17 @@ subroutine ini_get (utp, restart, expres, ts_res)
          x = (i-1) * Deltax
          ramp = (x - L/2)
          window = 0.5 * (tanh((ramp + 80e3)/eps) - tanh((ramp - 80e3)/eps))
-         utp(i) = (ramp/1d8)*window
+         utp(i) = (ramp/1d5)*window
+
+      elseif (initcond_vel .eq. 'Graysmoothsym') then
+
+         ! L = nx* Deltax
+         ! x = (i-1) * Deltax
+
+         ramp = (real(i)-1d0) - (real(nx))/2d0
+         window = 0.5 * (tanh((ramp +real(nx)/5d0)/eps) - tanh((ramp -real(nx)/5d0)/eps))
+         utp(i) = (ramp/80d0)*window
+
 
       elseif (initcond_vel .eq. 'GraysmoothConv') then
          
