@@ -20,6 +20,8 @@ sim1dplotting/outputs_VP/*
 sim1dplotting/Num_Visc_Plas/*
 sim1dplotting/SavedExperiments/*
 
+1DSIM_OM
+
 #- Hidden files for vscode
 .vscode 
 .fortls
