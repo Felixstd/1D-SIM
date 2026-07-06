@@ -18,6 +18,7 @@ class namelist:
         self.mechanical_energy = int(configuration_exp['mech_energy'])
         self.maxvelocities     = int(configuration_exp['maxvelocities'])
         self.strength          = int(configuration_exp['read_strength'])
+        self.helmP          = int(configuration_exp['helmP'])
 
         
         #------ Rheology ------#
@@ -29,8 +30,9 @@ class namelist:
         self.Nx         = [float(x) for x in configuration_rheo['Nx'].split(',')]
         self.adv        = int(configuration_rheo['advection_scheme'])
         self.imex       = int(configuration_rheo['IMEX'])
-        self.solv       = int(configuration_rheo['solver'])
+        self.solv       = [int(x) for x in configuration_rheo['solver'].split(',')]
         self.maxcapping = [float(x) for x in configuration_rheo['maxcapping'].split(',')]
+        self.lscale = [float(x) for x in configuration_rheo['l_scale'].split(',')]
         
         #------ Figures ------#
         self.outputdir = str(configuration_fig['outputdir'])
