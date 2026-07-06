@@ -72,15 +72,6 @@ for ind, exp in enumerate(Parameters.expno):
 		data = load_data.load_experiment_data(Parameters, Parameters.solv[ind],exp, ind, tstep)
 		data_exps.append(data)
 
-	if Parameters.maxvelocities:
-		file = "/aos/home/fstdenis/1D-SIM/output_post_files/min_max_vel_{}.out".format(exp)
-		max_velocities, min_velocities, tstep = read_data.read_maxvelocities(file)
-		print(len(max_velocities))
-		maxvel_exp.append(max_velocities)
-		
-		datadict_saved = {'max': max_velocities, 'min': min_velocities, 'tstep': tstep}
-		np.save('SavedExperiments/datadict_maxvel_{}.npy'.format(exp), datadict_saved)
-# 
 	if Parameters.plotfields:
 		
 		plot.plot_variable(Parameters.dx[ind], 
