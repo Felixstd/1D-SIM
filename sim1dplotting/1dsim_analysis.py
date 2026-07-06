@@ -69,18 +69,8 @@ for ind, exp in enumerate(Parameters.expno):
 	
 	if Parameters.read_all: 
 		 
-		data = load_data.load_experiment_data(Parameters, exp, ind, tstep)
-
-
-		if Parameters.savevar:
-			datadict_saved = data['base'].copy()
-			datadict_saved['timestep'] = float(Parameters.dt)
-			datadict_saved['resolution'] = float(Parameters.dx[ind]/1e3)
-			datadict_saved['dates'] = dates_time
-			# datadict_saved['Number_Regimes'] = [number_viscous, number_plastic, number_mixed_viszeta, number_mixed_viseta]
-			np.save('SavedExperiments/datadict_exp_{}.npy'.format(exp), datadict_saved)
-			datadict_energy_saved = data['energy_avg'].copy()
-			np.save('SavedExperiments/datadict_energy_saved_{}.npy'.format(exp), datadict_energy_saved)
+		data = load_data.load_experiment_data(Parameters, Parameters.solv[ind],exp, ind, tstep)
+		data_exps.append(data)
 
 	if Parameters.maxvelocities:
 		file = "/aos/home/fstdenis/1D-SIM/output_post_files/min_max_vel_{}.out".format(exp)
