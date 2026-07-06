@@ -4,7 +4,7 @@ import sim1dplotting.utils.analysis_utils as utils
 from sim1dplotting.data import read_data
 
 
-def load_experiment_data(Parameters, exp, ind, tstep):
+def load_experiment_data(Parameters, solver, exp, ind, tstep):
     
     #--------------------------------------------------------------
     # Default variables
@@ -14,7 +14,7 @@ def load_experiment_data(Parameters, exp, ind, tstep):
                                 exp, 
                                 int(Parameters.dt_read), 
                                 int(Parameters.dx[ind]/1e3), 
-                                Parameters.solv, 
+                                solver, 
                                 Parameters.imex, 
                                 Parameters.adv, 
                                 tstep, 
