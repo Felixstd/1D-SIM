@@ -66,17 +66,26 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   do i = 1, nx
 
-      if ((initcond_vel .eq. 'GraysmoothConv') .and. (initcond .eq. 'stepsmooth')) then 
-         A(i) = min(max(tanh((real(i)-real(nx)/3)/sharpness) &
-                     - tanh((real(i)-2*real(nx)/3)/sharpness), 0d0)/5, 1d0)
-            if (A(i) .gt. 0d0) then  
-               h(i) = A(i)
-            endif
 
-      elseif (initcond .eq. 'step') then
-         A(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
-         if (A(i) .gt. 0d0) then  
+      if (initcond .eq. 'step') then
+
+         if (((real(i)*Deltax)/1d3 .ge. 150) .and. ((real(i)*Deltax)/1d3 .le. 350)) then 
+            A(i) = 1d0
             h(i) = 1d0
+         
+         else 
+            A(i) = 0d0
+            h(i) = 0d0
+         endif
+
+      elseif (initcond .eq. 'Gray') then 
+         if (((real(i)*Deltax)/1d3 .ge. 150) .and. ((real(i)*Deltax)/1d3 .le. 350)) then 
+            A(i) = (10000d0-(real(nx)/2d0 - real(i))**2)**(1/40d0)
+            h(i) = A(i)
+         
+         else 
+            A(i) = 0d0
+            h(i) = 0d0
          endif
 
       elseif (initcond .eq. 'stepsmooth') then
