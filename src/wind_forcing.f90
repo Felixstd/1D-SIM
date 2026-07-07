@@ -30,9 +30,22 @@ subroutine wind_forcing (tauair, ts)
       enddo
    
    elseif (diverging_winds) then 
+
+      Tramp = 60*60*2
+      rampfactor = tanh(ts*Deltat/Tramp)
+      vel_wind = uwind*rampfactor
       
       do i = 2, nx! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
-         tauair(i) = Cda * abs(uwind) * tanh(real((i - nx/2)) / (nx/2))*uwind
+
+         if (i < nx/2) then 
+            tauair(i) = -Cda * (vel_wind)**2d0
+         
+         elseif(i>nx/2) then 
+            tauair(i) = Cda * (vel_wind)**2d0
+         else 
+            tauair(i) = 0d0
+         endif
+
       enddo
 
    elseif (rampupwind) then
