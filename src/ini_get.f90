@@ -24,11 +24,12 @@ subroutine ini_get (utp, restart, expres, ts_res)
   double precision :: rdnb, small, ramp, eps, window, x, L
   double precision :: x1, x2, c1, c2, b1, b2, par1, par2, w, g
   double precision :: sharpness, i_prime
+  double precision  :: umax, slope, b
 
   character(LEN=30) filename  ! restart file name 
 
   small = 0.0001d0
-  eps = 20000 !controls sharpness of the transition
+  eps = 5 !controls sharpness of the transition
 
   allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
   allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
@@ -63,6 +64,9 @@ subroutine ini_get (utp, restart, expres, ts_res)
   else ! specify initial fields
 
   sharpness = 0.0000001**(-0.1)
+  umax = 0.4d0
+  slope = 2*umax/(200d3+Deltax)
+  b = -(300d3/(200d3+Deltax)+1)*umax
 
   do i = 1, nx
 
@@ -127,9 +131,20 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
       if (initcond_vel .eq. 'Gray') then 
       
-         if (h(i) > 0d0) then 
-            utp(i) = (i - nx/2d0)/1e5
-         
+         if (((real(i))*Deltax)/1d3 >= 150 .and. (real(i)*Deltax)/1d3 <= (350+Deltax/1e3)) then 
+
+            utp(i) = slope*(real(i)*Deltax) + b
+         else 
+            utp(i) = 0
+         endif
+
+      elseif (initcond_vel .eq. 'Gray2')then
+
+         slope = 2*umax/(200d3)
+         b = -(300d3/(200d3)+1)*umax
+
+         if (((real(i))*Deltax)/1d3 >= 150 .and. (real(i)*Deltax)/1d3 <= (350+Deltax/1e3)) then 
+            utp(i) = slope*(real(i)*Deltax) + b
          else 
             utp(i) = 0
          endif
