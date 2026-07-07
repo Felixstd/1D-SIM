@@ -2,7 +2,7 @@
 !     solves Au=b with the SOR method or Pdu=rhs (as a precond)
 !****************************************************************************
 
-subroutine SOR (b, utp, un1, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
+subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
     use size
     use resolution
     use properties
@@ -19,7 +19,7 @@ subroutine SOR (b, utp, un1, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
     double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
     double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1)
     double precision, intent(in)  :: htp(0:nx+1), Atp(0:nx+1)
-    double precision, intent(in)  :: b(1:nx+1), un1(1:nx+1)
+    double precision, intent(in)  :: b(1:nx+1)
     double precision              :: D(1:nx+1)
 
     double precision :: h_at_u, a_at_u, B1, residual ,maxerror

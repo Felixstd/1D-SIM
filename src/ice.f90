@@ -295,8 +295,7 @@ program ice
                     print *, 'L2-norm after k ite=', ts, k-1, L2norm
                     
                     call bvect(tauair, un1, Cw, b)
-                    ! call output_sor(ts,k,solver, expnb,b)
-                    call SOR (b, u, un1, h, A, zeta, eta, Cw, Cb, p_flag, ts)
+                    call SOR (b, u, h, A, zeta, eta, Cw, Cb, p_flag, ts)
       !             call SOR_A (b, u, zeta, eta, Cw, k, ts)
                 elseif (solver .eq. 2) then
                     call prepFGMRES_NK(u, h, A, F_uk1, zeta, eta, Cw, Cb, un1, un2, tauair, &
