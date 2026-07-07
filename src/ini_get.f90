@@ -97,18 +97,6 @@ subroutine ini_get (utp, restart, expres, ts_res)
                h(i) = A(i)
             endif
             
-      elseif (initcond .eq. 'gaussian') then
-         A(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
-         h(i) = min(0.1d0*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
-
-      elseif (initcond .eq. 'supergaussian') then
-         A(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
-         h(i) = min(exp(-D*(real(i)-real(nx)/2d0)**(2*n)), 1d0)
-
-      elseif (initcond .eq. 'gaussianh') then
-         A(i) = 1d0
-         h(i) = min(0.1*exp(-D*(real(i) - real(nx)/2d0)**2d0), 1d0)
-
       elseif (initcond .eq. 'constantAsteph') then
          A(i) = 1d0
          h(i) = min(max((real(10000d0)-(real(i)-real(nx)/2d0)**2)**(1/20d0), 0d0), 1d0)
@@ -154,41 +142,14 @@ subroutine ini_get (utp, restart, expres, ts_res)
          window = 0.5 * (tanh((ramp +real(nx)/5d0)/eps) - tanh((ramp -real(nx)/5d0)/eps))
          utp(i) = (ramp/80d0)*window
 
+      elseif (initcond_vel .eq. 'GraysmoothsymLong') then
 
-      elseif (initcond_vel .eq. 'GraysmoothConv') then
-         
-         L = nx* Deltax
-         x = (i-1) * Deltax
-         ramp = (x - L/2)
-         window = 0.5 * (tanh((ramp + 80e3)/eps) - tanh((ramp - 80e3)/eps))
-         utp(i) = -(ramp/1d8)*window
-      
-      elseif (initcond_vel .eq. 'parabolaConv') then 
-         w = 10d0
-         g = 100d0
-         c1 = nx/2d0 - g/2d0
-         c2 = nx/2d0 + g/2d0
+         ! L = nx* Deltax
+         ! x = (i-1) * Deltax
 
-         x1 = (i - c1)/w
-         x2 = (i - c2)/w
-         if (abs(x1) < 1) then
-            b1 = exp(-1d0/(1-x1**2d0))
-         else
-            b1 = 0
-         endif
-
-         if (abs(x2) < 1) then
-            b2 = exp(-1d0/(1-x2**2d0))
-         else
-            b2 = 0
-         endif
-
-
-         par1 = -(1d0-((i - c1)/w)**2d0)*b1/w
-         par2 = (1d0-((i - c2)/w)**2d0)*b2/w
-
-         utp(i) = par1 + par2+0.001
-
+         ramp = (real(i)-1d0) - (real(nx))/2d0
+         window = 0.5 * (tanh((ramp +real(nx)/3d0)/eps) - tanh((ramp -real(nx)/3d0)/eps))
+         utp(i) = (ramp/100d0)*window
 
       elseif (initcond_vel .eq. 'zero') then 
          utp(i) = 0d0
