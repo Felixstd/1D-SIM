@@ -68,6 +68,7 @@ subroutine get_default
     Nmax_OL    = 1000
 
     N_sub = 900
+    T0 = 0.36d0 ! elast. damping time scale (Deltate < T < Deltat)
 
     omega      = 1.5d0    ! relax parameter for SOR
     ! omega      = 1d0    ! relax parameter for SOR
@@ -199,7 +200,7 @@ subroutine read_namelist
   
 
     namelist /numerical_param_nml/ &
-        Deltat, T_tot, Agamma, gamma_nl, Nmax_OL, tol_SOR, maxiteSOR
+        Deltat, T_tot, Agamma, gamma_nl, Nmax_OL, tol_SOR, maxiteSOR, N_sub, T0
 
     namelist /phys_param_nml/ &
         Pstar, C, e, rhoair, rho, rhowater, &

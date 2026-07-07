@@ -63,7 +63,7 @@ MODULE numerical
   IMPLICIT NONE
   INTEGER :: N_sub, maxiteSOR, maxiteGMRES, iteSOR_pre
   INTEGER :: Nmax_OL, solver
-  DOUBLE PRECISION :: T, smallA
+  DOUBLE PRECISION :: T, smallA, T0
   DOUBLE PRECISION :: omega, tol_SOR, dropini, gamma_nl
 
 END MODULE numerical

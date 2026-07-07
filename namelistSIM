@@ -31,6 +31,8 @@
     Nmax_OL    = 500
     tol_SOR    = 1d-10
     maxiteSOR  = 10000
+    N_sub = 1200
+    T0 = 0.36d0
 /
 
 &phys_param_nml
