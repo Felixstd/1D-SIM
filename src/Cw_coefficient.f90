@@ -43,27 +43,28 @@ subroutine Cw_coefficient (utp, Cw, Cb)
 
   Cb(1)    = 0d0
   Cb(nx+1) = 0d0
-  
-  do i = 2, nx
-   
-   bathy_at_u = min(bathy(i-1), bathy(i))
-	
-   if (bathy_at_u .gt. 30d0) then ! too deep for bottom drag
-    Cb(i) = 0d0
-   else
-    hc=bathy_at_u/k1
-    h_at_u = max( h(i-1), h(i) )
-	  
-    if ( h_at_u .gt. hc ) then
-     A_at_u = max( A(i-1), A(i) )
-     Cbfactor=k2/(abs(utp(i))+umin)
-     Cb(i) = Cbfactor * (h_at_u - hc) * dexp(-CC * ( 1d0 - A_at_u ))
-    else
-     Cb(i) = 0d0
-    endif
-   endif
+  Cb = 0d0
 
-  enddo
+  ! do i = 2, nx
+   
+  !  bathy_at_u = min(bathy(i-1), bathy(i))
+	
+  !  if (bathy_at_u .gt. 30d0) then ! too deep for bottom drag
+  !   Cb(i) = 0d0
+  !  else
+  !   hc=bathy_at_u/k1
+  !   h_at_u = max( h(i-1), h(i) )
+	  
+  !   if ( h_at_u .gt. hc ) then
+  !    A_at_u = max( A(i-1), A(i) )
+  !    Cbfactor=k2/(abs(utp(i))+umin)
+  !    Cb(i) = Cbfactor * (h_at_u - hc) * dexp(-CC * ( 1d0 - A_at_u ))
+  !   else
+  !    Cb(i) = 0d0
+  !   endif
+  !  endif
+
+  ! enddo
   
 !------------------------------
 
