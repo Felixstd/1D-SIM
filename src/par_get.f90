@@ -241,6 +241,10 @@ subroutine read_namelist
     Cda        = rhoair   * Cdair
     Cdw        = rhowater * Cdwater
 
+    if (initcond == 'constants' .and. nx .eq. 500) then 
+        Deltax = 4000d0
+    endif
+
     Deltax2 = Deltax ** 2
     DtoverDx = Deltat / Deltax
 
