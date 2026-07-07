@@ -33,6 +33,8 @@ subroutine ice_strength ( hin, Ain, uin)
     enddo
   endif
 
+  ! print*, "Ice strength constant = ", C
+
 !------- set p = 0 at open boundaries for proper care of open bc --------------
 !                    see p.1241-1242 for details              
 !--- set dh/dx, dA/dx = 0 at the outside cell when there is an open bc --------
