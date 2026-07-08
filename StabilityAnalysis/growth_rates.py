@@ -1,30 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import VP_nonlocal_stab as omega
-import matplotlib as mpl
-from numba import jit
-from matplotlib.ticker import SymmetricalLogLocator
+from seaiceparameters import *
 
 plt.style.use('/aos/home/fstdenis/1D-SIM/sim1dplotting/science.mplstyle')
-
-
-dt = 15
-N= 100
-e = 2 
-h0 = 1
-A0 = 1
-C_s = 20
-Pstarstar = 27.5e3*np.exp(-C_s*(1-A0))
-rhoi = 900
-T = 0.36*dt
-alpha = 1/((1+e**(-2))*T)
-lamda_div =(np.sqrt(1+e**(-2))-1)/2
-lamda_conv = (-np.sqrt(1+e**(-2))-1)/2
-rho = 900
-nu_max = 1e12
-P0 = Pstarstar*h0
-
-
 
 def VPs_growth(k):
     """
