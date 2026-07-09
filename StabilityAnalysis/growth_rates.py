@@ -33,10 +33,9 @@ def VP_nonlocal(k, l = 40e3):
     Returns:
         omega_div,omega_conv: growth rates in div and conv. 
     """
-    alpha = 2/(l**2)*(P0-Pstarstar)
-    omega_div = np.sqrt(lamda_div/(rho*h0)*((Pstarstar/l**2)*h0*(1+C_s*A0)+alpha*A0)*k**2/(k**2+1/l**2))
-    
-    omega_conv = np.sqrt((lamda_conv/(rho*h0)*((Pstarstar/l**2)*h0*(1+C_s*A0)+alpha*A0)*k**2/(k**2+1/l**2)).astype(complex))
+    l0 = l*A0   
+    omega_div = k*np.sqrt(lamda_div/(rho*h0)*((2*P0+(C_s*A0-1)*Pstarstar*h0))*(1/(l0**2*k**2+1)))
+    omega_conv = k*np.sqrt(lamda_conv/(rho*h0)*((2*P0+(C_s*A0-1)*Pstarstar*h0))*(1/(l0**2*k**2+1)).astype(complex))
     return omega_div,omega_conv
 
 
