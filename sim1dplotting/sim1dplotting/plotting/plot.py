@@ -4,10 +4,22 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib as mpl
 import cmocean
+from matplotlib.colors import LogNorm
+from matplotlib.colors import Normalize
+import matplotlib.colors as mcolors
+from sim1dplotting.utils import analysis_utils as utils
 # import scienceplots
 
 # plt.style.use('science')
 plt.style.use('/aos/home/fstdenis/1D-SIM/sim1dplotting/science.mplstyle')
+
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=256):
+    """Return a new colormap sampling only [minval, maxval] of cmap."""
+    new_cmap = mcolors.LinearSegmentedColormap.from_list(
+            f'trunc({cmap.name},{minval:.2f},{maxval:.2f})',
+            cmap(np.linspace(minval, maxval, n))
+        )
+    return new_cmap
 
 def normalize_stresses(sigI, sigII, p, eps = 1e-12):
     
@@ -89,7 +101,10 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     ax_all_u = plt.axes()
     
     fig_all_div = plt.figure(5, figsize = (5, 4))
-    ax_all_div= plt.axes()
+    ax_all_div = plt.axes()
+    
+    fig_all_P = plt.figure(6, figsize = (5, 4))
+    ax_all_P = plt.axes()
     
     # print(dates)
     
@@ -104,8 +119,12 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     cmap = plt.cm.viridis
     sm = cm.ScalarMappable(cmap=cmap, norm=norm)
     
-    for k, date in enumerate(dates):
-        
+    k_idx = [0,2,4,6,8,10,12,14,16,18,19]
+    
+    for k, date in enumerate(np.append(dates[::2],dates[-1])):
+    # for k, date in enumerate(dates):
+        # k_idx = [0,2,4,6,8,10,12,14,16,19]
+        k = k_idx[k]
         print('Plotting: ', date)
         
         divergence, sig = divergence_tot[k], sigma_tot[k]
@@ -115,14 +134,16 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         eta, zeta = eta_tot[k], zeta_tot[k]
         eta_max = np.max(eta)
         zeta_max = np.max(zeta)
-        
+        # print(u)
         if Parameters.GC:
             muI = muI_tot[k]
             P = P_tot[k]
         
         if Dissipation:
             w_dissip = Wdissip_tot[k]
-        
+            
+        if Parameters.strength:
+            P = P_tot[k]
         
         #----- Deformation Plots -----#
         
@@ -139,9 +160,8 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         # ax1.set_aspect('equal')
         ax1.set_aspect(1./ax1.get_data_ratio())        
         
-        # plt.axis('equal')
-        
         fig.savefig(figdir+'ice_u_{}_{}.png'.format(k, expno))
+        plt.close()
         
         fig, (ax1)= plt.subplots(1, 1, sharex = True, figsize = (5, 4))
              
@@ -158,6 +178,24 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         # plt.axis('equal')
         
         fig.savefig(figdir+'ice_eta_{}_{}.png'.format(k, expno))
+        plt.close()
+        
+        fig, (ax1)= plt.subplots(1, 1, sharex = True, figsize = (5, 4))
+             
+        ax1.plot(X[1:-1], divergence[1:-1], color = 'r')
+        ax1.set_xlabel('x (km)')
+        ax1.set_ylabel(r'Divergence (1/s)')
+        # ax1.set_xlim(Nx)
+        ax1.grid()
+        plt.legend()
+        # ax1.set_aspect('equal')
+        ax1.set_aspect(1./ax1.get_data_ratio())        
+        
+        # plt.axis('equal')
+        
+        fig.savefig(figdir+'ice_div_{}_{}.png'.format(k, expno))
+        plt.close()
+        
         
         fig, (ax1)= plt.subplots(1, 1, sharex = True, figsize = (7, 3))
         
@@ -165,35 +203,19 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         for i in range(1, len(eta)-1):
             eta_i = eta[i]
             zeta_i = zeta[i]
-            
-            if eta_i == eta_max and zeta_i == zeta_max :
-                colors_sig.append('r')
-            
-            elif eta_i != eta_max and zeta_i == zeta_max :
-                
-                colors_sig.append('b')
-                
-            elif eta_i == eta_max and zeta_i != zeta_max :
-                
-                colors_sig.append('orange')
-                
-            else:
-                colors_sig.append('g')
-                
         
-        ax1.scatter(divergence[1:-1], sig_norm[1:-1], c = colors_sig)
+        sc= ax1.scatter(divergence[1:-1], zeta[1:-1]/1e9)
+        
         ax1.set_xlabel(r'$\dot{\epsilon}_I$ (1/s)')
-        ax1.set_ylabel(r'$\sigma_{11}/P$')
+        ax1.set_ylabel(r'$\zeta/\zeta_{max}$')
         ax1.set_xscale('symlog', linthresh = 1e-8)
-        ax1.set_xlim(-1e-3, 1e-3 )
+        ax1.set_xlim(0, 1e-3 )
         # ax1.set_xlim(Nx)
         ax1.grid()
-        # ax1.set_aspect('equal')
-        # ax1.set_aspect(1./ax1.get_data_ratio())        
+        fig.colorbar(sc,ax=ax1)
+        fig.savefig(figdir+'ice_zeta_{}_{}.png'.format(k, expno))
+        plt.close()
         
-        # plt.axis('equal')
-        
-        fig.savefig(figdir+'ice_sigma_{}_{}.png'.format(k, expno))
         
         if Dissipation:
             fig, (ax4)= plt.subplots(1, 1, sharex = True, figsize = (10, 12))
@@ -216,24 +238,14 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
             criteria_conv = (-muI-1)*P/1e9
             criteria_div = (muI-1)*P/1e9
             
-            # ax4.plot(X[1:-1], criteria_conv[:-1], color = 'r')
-            # ax4.plot(X[1:-1], criteria_div[:-1], color = 'g')
-            # ax4.plot(X[1:-1], divergence[1:-1], color = 'k')
             print(criteria_div[:-1][divergence[1:-1] > 0])
-            # ax4.scatter( divergence[1:-1][divergence[1:-1] < 0], criteria_conv[:-1][divergence[1:-1] < 0])
             ax4.scatter( divergence[1:-1][divergence[1:-1] > 0], criteria_div[:-1][divergence[1:-1] > 0])
-            # ax4.plot(X[1:-1], P[:-1]/P.max(), color = 'b')
             ax4.set_xlabel('X (km)')
             ax4.set_ylabel(r'$criteria$')
-            # ax4.set_xlim(150, 350)
             ax4.grid()
-            # ax1.set_aspect('equal')
-            # ax4.set_aspect(1./ax1.get_data_ratio())        
-            
-            # plt.axis('equal')
             
             fig.savefig(figdir+'ice_criteria_{}_{}.png'.format(k, expno))
-        
+            
         #--- Plot of A and h ---# 
         fig, (ax1, ax2)= plt.subplots(1, 2, sharex = True, figsize = (10, 12))
         
@@ -252,21 +264,24 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         # ax2.set_aspect('equal')
         ax2.set_aspect(1./ax2.get_data_ratio())
         
-        color = cmap(k/10)
+        color = cmap(k/len(dates))
         
         
         ax_all_A.plot(X[1:-1], A[1:-1], label = '{}'.format(date), color = color)
-        ax_all_u.plot(X[1:-1], u[:-1], label = '{}'.format(date), color = color)
+        ax_all_u.plot(X[2:-1], u[1:-1], label = '{}'.format(date), color = color)
         ax_all_h.plot(X[1:-1], h[1:-1], label = '{}'.format(date), color = color)
         
         ax_all_div.plot(X[1:-1], divergence[1:-1], label = '{}'.format(date), color = color)
         
         if Parameters.GC:
             ax_all_mu.plot(X[1:-1], muI[0:-1], label = '{}'.format(date), color = color)
-        # plt.axis('equal')
+
+        if Parameters.strength:
+            ax_all_P.plot(X[1:-1], P[1:-1], label = '{}'.format(date), color = color)
         
         fig.savefig(figdir+'ice_A_h_{}_{}.png'.format(k, expno))
-    
+        plt.close()
+        
     # ax_all_A.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax_all_A.grid()
     ax_all_A.set_xlabel('X (km)')
@@ -305,6 +320,17 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
         fig_all_mu.colorbar(sm, ax = ax_all_mu, 
                         label = 'Time (hr)')
         fig_all_mu.savefig(figdir+'time_plot_mu_{}.png'.format(expno))
+        plt.close()
+        
+    if Parameters.strength:
+        ax_all_P.grid()
+        ax_all_P.set_xlabel('$x$ (km)')
+        ax_all_P.set_ylabel(r'$P$ (N/m$^2$)')
+        sm = cm.ScalarMappable(cmap = cmap,
+                            norm = norm)
+        fig_all_P.colorbar(sm, ax = ax_all_P, 
+                        label = 'Time (hr)')
+        fig_all_P.savefig(figdir+'time_plot_P_{}.png'.format(expno))
         plt.close()
     
     ax_all_div.grid()
@@ -378,15 +404,17 @@ def plot_initial_conditions(A_tot, h_tot, u_tot, X, figdir, expno):
     A_init = A_tot[0]
     h_init = h_tot[0]
     u_init = u_tot[0]
+    X_u = np.arange(1,len(u_init)+1)*(X[2]-X[1])
+    # idx_max
     plt.figure()
     ax1 = plt.axes()
     ax2 = ax1.twinx()
     # ax1.plot(X[1:-1], A_init[1:-1], color = 'k')
     # print(X)
-    ax1.plot(X[1:-1], h_init[1:-1], color = 'k')
-    ax1.set_ylabel(r'$h$ (m)',color = 'k' )
-    ax1.set_xlabel(r'x (m)',color = 'k' )
-    ax2.plot(X[1:-1], u_init[:-1], linestyle = '-', color = 'b')
+    ax1.plot(X[1:-1]+(X[2]-X[1]), h_init[1:-1], color = 'k')
+    ax1.set_ylabel(r'A, $h$ (m)',color = 'k' )
+    ax1.set_xlabel(r'x (km)',color = 'k' )
+    ax2.plot(X_u, u_init, linestyle = '-', color = 'b')    
     plt.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
     ax2.set_ylabel(r'$u$ (m/s)', color='b')
     ax2.tick_params(axis='y', labelcolor='b')
@@ -450,6 +478,7 @@ def plot_figures_paper(dates,
     if highres_3:
         fig, ((ax1, ax3, ax5), (ax2, ax4, ax6)) = plt.subplots(2,3,figsize = (13,7),
                                                sharex = True,
+                                               sharey='row',
                                                constrained_layout = True)
         
         axs = [ax1,ax2,ax3,ax4,ax5,ax6]    
@@ -963,12 +992,12 @@ def plot_ridgebuilding(Parameters, data_exps):
         data_exps (_type_): _description_
     """
     
-    original_cmap = plt.get_cmap('magma')
-    norm = Normalize(vmin=5, vmax=250)
+    okabe_ito = ['#999999', '#CC79A7','#0072B2','#009E73','#E69F00','#D55E00','#999933']
 
     file_fits = open("./output_fits_ridging.txt", "w")
 
     fig,(ax1) = plt.subplots(1,1, figsize = (8,4),constrained_layout = True,sharex =True)
+    fig2, (ax2) = plt.subplots(1,1, figsize = (8,4),constrained_layout = True,sharex =True)
 
 
     plt.rcParams.update({
@@ -983,13 +1012,10 @@ def plot_ridgebuilding(Parameters, data_exps):
     for i, exp in enumerate(Parameters.expno):
         data = data_exps[i]
         h_tot = data['h']
-        
+        u_tot = data['u']
         
         x = data['x']
         
-        l_scale = Parameters.lscale[i]
-
-        color = original_cmap(norm(l_scale))
 
         indice = np.where(h_tot[-1][1:-1] > 1.05)
         if len(indice[0]) < 1:
@@ -1003,24 +1029,32 @@ def plot_ridgebuilding(Parameters, data_exps):
             fit = np.polyfit(x[1:indice], h_tot[-1][1:indice],deg=1,cov=True) 
             
         if Parameters.lscale[i] == 0:
-            ax1.plot(x[1:-1]/1e3, h_tot[-1][1:-1], alpha = 0.8, color = 'royalblue', label = 'VP')
+            u_ref_vp = u_tot[-1]
+            
+            ax1.plot(x[1:-1]/1e3, h_tot[-1][1:-1], alpha = 0.8, color = okabe_ito[i], label = 'VP')
             m = (2*1.3*1.2e-3*(5)**2/(27.5e3*(np.sqrt(1+2**(-2))+1)))
             theory = -m*x[1:indice]+fit[0][1]
-            ax1.plot(x[1:indice]/1e3, theory, color = 'gray', linestyle = '--', label = 'theory',zorder = 3)
+            ax1.plot(x[1:indice]/1e3, theory, color = 'k', linestyle = '--', label = 'theory',zorder = 3)
             file_fits.write('Theory slope: '+str(m)+'\n')
-        
+            
+        elif Parameters.lscale[i] == -1:
+            ax1.plot(x[1:-1]/1e3, h_tot[-1][1:-1], alpha = 0.8, 
+                    color = okabe_ito[-1], label = r'EVP')
+            ax2.plot(x[:-1]/1e3,u_tot[-1]-u_ref_vp,color = okabe_ito[-1], label = r'EVP')
+
         else:
             ax1.plot(x[1:-1]/1e3, h_tot[-1][1:-1], alpha = 0.8, 
-                    color = color, label = r'$l_c = {}$ km'.format(int(Parameters.lscale[i])))
+                    color = okabe_ito[i], label = r'$l_c = {}$ km'.format(int(Parameters.lscale[i])))
+            ax2.plot(x[:-1]/1e3,u_tot[-1]-u_ref_vp,color = okabe_ito[i], label = r'$l_c = {}$ km'.format(int(Parameters.lscale[i])))
 
         err_slope = fit[1][0,0]
-        
-        file_fits.write(f'l_c: {Parameters.lscale[i]} slope: {fit[0][0]} err_slope: {err_slope}\n')
+        err_slope_theo = utils.absolute_error(-fit[0][0], m)
+        file_fits.write(f'l_c: {Parameters.lscale[i]} slope: {fit[0][0]} err_slope: {err_slope} absolute error: {err_slope_theo*100}\n')
         
         
     leg = ax1.legend(
             loc='center left',
-            bbox_to_anchor=(0.81, 0.7),   # just outside ax1
+            bbox_to_anchor=(0.81, 0.67),   # just outside ax1
             frameon=False,
             handlelength=0,
             handletextpad=0
@@ -1031,9 +1065,25 @@ def plot_ridgebuilding(Parameters, data_exps):
     ax1.grid(alpha = 0.5)
     fig.supxlabel('x (km)',x = 0.52)
     fig.supylabel(r'$h$ (m)',fontsize =12)
-    plt.xlim(0,2000)
-    plt.savefig('./Figures/ridge_building_lscale2.png')
-    plt.close(2)
+    ax1.set_xlim(0,1000)
+    # ax1.set_yscale('log')
+    fig.savefig('./Figures/ridge_building_lscale_log.png')
+    plt.close()
+    
+    leg = ax2.legend(
+            loc='center left',
+            bbox_to_anchor=(0.81, 0.67),   # just outside ax1
+            frameon=False,
+            handlelength=0,
+            handletextpad=0
+        )
+    for handle, text in zip(leg.legend_handles, leg.get_texts()):
+        text.set_color(handle.get_color())
+    ax2.set_xlim(0,1000)
+    ax2.set_yscale('symlog', linthresh = 1e-5)
+    fig2.supxlabel('x (km)',x = 0.52)
+    fig2.supylabel(r'$u - u_{vp}$ (m/s)',fontsize =12)
+    fig2.savefig('diff_u.png')
     file_fits.close()
 
     
