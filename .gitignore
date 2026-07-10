@@ -30,3 +30,8 @@ sim1dplotting/SavedExperiments/*
 #- Python cache 
 /__pycache__/*
 *.pyc
+
+#model files
+input_1dsim
+run_1dsim.sh
+
