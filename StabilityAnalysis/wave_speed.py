@@ -51,10 +51,10 @@ omega_nVP_k_l = np.zeros([len(ls),n])
 wavespeed_vp = wavespeed_VP(A)
 
 for i, l in enumerate(ls):
-    omega_nVP_k_l[i],_ = wavespeed_nVP(1,2.5, k, l = l)
+    omega_nVP_k_l[i],omegag_nVP_k_l[i] = wavespeed_nVP(1,1, k, l = l)
     for j, ks in enumerate(k_sample):
-        omega_nVP_A_l[i][j],_ = wavespeed_nVP(A, 1, ks, l = l)
-        omega_nVP_h_l[i][j],_ = wavespeed_nVP(1, h, ks, l = l)
+        omega_nVP_A_l[i][j],omegag_nVP_A_l[i][j] = wavespeed_nVP(A, 1, ks, l = l)
+        omega_nVP_h_l[i][j],omegag_nVP_h_l[i][j] = wavespeed_nVP(1, h, ks, l = l)
         
     # print(omega_nVP_k_l[i])
     
@@ -73,12 +73,14 @@ plt.rcParams.update({
 
 for i, l in enumerate(ls):
     axs[2].plot(k, omega_nVP_k_l[i], label = 'l = {}'.format(int(l/1e3)), color = okabe_ito[i])
+    axs[2].plot(k, omegag_nVP_k_l[i], label = 'l = {}'.format(int(l/1e3)), color = okabe_ito[i], linestyle = '--')
 
     for j, ks in enumerate(k_sample):
     
         axs[0].plot(A, omega_nVP_A_l[i][j], label = 'l = {}, k = {}'.format(int(l/1e3), k_sample[j]),linestyle = linestyles[j], color = okabe_ito[i])
+        axs[0].plot(A, omegag_nVP_A_l[i][j], label = 'l = {}, k = {}'.format(int(l/1e3), k_sample[j]),linestyle = '--', color = okabe_ito[i])
         axs[1].plot(h, omega_nVP_h_l[i][j], label = 'l = {}'.format(int(l/1e3)),linestyle = linestyles[j], color = okabe_ito[i])
-
+        axs[1].plot(h, omegag_nVP_h_l[i][j], label = 'l = {}, k = {}'.format(int(l/1e3), k_sample[j]),linestyle = '--', color = okabe_ito[i])
 for ax in axs: 
     ax.axhline(CFL)
     
