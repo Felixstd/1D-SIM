@@ -33,6 +33,9 @@ plt.xlabel('Strain rate',fontsize = 14, alpha = 0.5)
 ax.annotate("Viscosity", xy=(-0.34,1), xytext=(0,3), 
             xycoords="axes fraction", textcoords="offset points", 
             ha="left", alpha = 0.5, fontsize = 14) 
+ax.set_xticks([])
+ax.set_yticks([])
+ax.margins(0) 
 
 # Change all spines at once
 for spine in ax.spines.values():
@@ -74,6 +77,9 @@ def make_figure(n_lines):
     ax.axvspan(-1, 1, color='crimson', alpha=0.25, lw=0, edgecolor=None)
     ax.axvspan(-4, -1, color='royalblue', alpha=0.25, lw=0, edgecolor=None)
     ax.axvspan(1, 4, color='royalblue', alpha=0.25, lw=0, edgecolor=None)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.margins(0) 
 
     plt.xlabel('Strain rate', fontsize=14, alpha=0.5)
     ax.annotate("Viscosity", xy=(-0.34, 1), xytext=(0, 3),
