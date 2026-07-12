@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaiceparameters as param
 from numba import njit, prange
 plt.style.use('/aos/home/fstdenis/1D-SIM/sim1dplotting/science.mplstyle')
-
+okabe_ito = ['#CC79A7','#0072B2','#009E73','#E69F00','#D55E00']
 
 nx = 500
 nt = 100000
@@ -131,13 +131,26 @@ plt.legend()
 plt.savefig('a_nl_heml.png')
 
 
-plt.figure()
+plt.figure(figsize = (5,3))
+ax = plt.axes()
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
 for i, P_nl in enumerate(P_nl_lc):
 
-    plt.plot(x[0:-1]/1e3, P_nl[-1]/1e3, label = r'$l_c = {}$ km'.format(int(l_c[i]/1e3)))
-plt.plot(x[0:-1]/1e3, P_loc[-1]/1e3, label = 'local')
+    plt.plot(x[2:]/1e3, P_nl[-1][1:]/1e3, 
+             color = okabe_ito[i],
+             label = r'$l_c = {}$ km'.format(int(l_c[i]/1e3)))
+plt.plot(x[2:]/1e3, P_loc[-1][1:]/1e3, label = r'$P_H$', color ='#777777')
 plt.xlabel('x (km)')
 plt.ylabel('P (kN/m)')
-plt.legend()
+leg = ax.legend(
+        loc='best',
+        # bbox_to_anchor=(0.01, 1),   # just outside ax1
+        frameon=False,
+        handlelength=0,
+        handletextpad=0
+    )
+for handle, text in zip(leg.legend_handles, leg.get_texts()):
+        text.set_color(handle.get_color())
 plt.savefig('p_nl_heml.png')
         
