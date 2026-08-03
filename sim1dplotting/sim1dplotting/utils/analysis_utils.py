@@ -15,4 +15,17 @@ def map_dx(Nx, dx):
     }
     
     return mapping.get(Nx, dx)
+
+def absolute_error(O, T): 
+    """
+    Computing the absolute error. 
+
+    Args:
+        O (array): observations
+        T (array): truth
+    """
+    
+    err = abs(T-O)/abs(T)
+    
+    return err
     
