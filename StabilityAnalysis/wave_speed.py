@@ -47,6 +47,10 @@ omega_nVP_A_l = np.zeros([len(ls),len(k_sample), n])
 omega_nVP_h_l = np.zeros([len(ls),len(k_sample), n])
 omega_nVP_k_l = np.zeros([len(ls),n])
 
+omegag_nVP_A_l = np.zeros([len(ls),len(k_sample), n])
+omegag_nVP_h_l = np.zeros([len(ls),len(k_sample), n])
+omegag_nVP_k_l = np.zeros([len(ls),n])
+
 
 wavespeed_vp = wavespeed_VP(A)
 
@@ -55,10 +59,7 @@ for i, l in enumerate(ls):
     for j, ks in enumerate(k_sample):
         omega_nVP_A_l[i][j],omegag_nVP_A_l[i][j] = wavespeed_nVP(A, 1, ks, l = l)
         omega_nVP_h_l[i][j],omegag_nVP_h_l[i][j] = wavespeed_nVP(1, h, ks, l = l)
-        
-    # print(omega_nVP_k_l[i])
-    
-    
+
 
 fig, axs = plt.subplots(3, 1, figsize = (5, 7), constrained_layout = True)
 
