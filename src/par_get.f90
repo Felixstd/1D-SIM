@@ -241,7 +241,8 @@ subroutine read_namelist
     Cda        = rhoair   * Cdair
     Cdw        = rhowater * Cdwater
 
-    if (initcond == 'constants' .and. nx .eq. 500) then 
+    if (((initcond == 'constants') .or. (initcond == 'Wall')) &
+            .and. nx .eq. 500) then 
         Deltax = 4000d0
     endif
 
