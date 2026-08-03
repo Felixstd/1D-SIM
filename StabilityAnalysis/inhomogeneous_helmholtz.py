@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import seaiceparameters as param
 from numba import njit, prange
 plt.style.use('/aos/home/fstdenis/1D-SIM/sim1dplotting/science.mplstyle')
-okabe_ito = ['#CC79A7','#0072B2','#009E73','#E69F00','#D55E00']
-
+okabe_ito = ['#E69F00','#0072B2','#009E73','#CC79A7','#D55E00']
+# E69F00
 nx = 500
-nt = 100000
+nt = 2
 deltax = 4000
 deltax2 = deltax**2
 deltat = 1
@@ -95,10 +95,10 @@ def run_simulation(A, h, u, l_c, nx, nt, deltax2, dtoverdx, Pstar, C_s):
 A = np.ones((nt, nx+1))
 h = np.zeros_like(A)
 for i in range(nx):
-    if i < 125:
+    if i < 250:
         h[0, i] = 5.0 
-    elif 125 <= i < 250:
-        h[0,i] = (-i/125)+3
+    # elif 125 <= i < 250:
+        # h[0,i] = (-i/125)+3
     else:
         h[0,i] = 1
 
@@ -107,7 +107,7 @@ u[0:125] = 0.0001
 u[125:-1]= 0.5
 u[0], u[nx] = 0.0, 0.0
 
-l_c = np.array([10e3, 50e3, 100e3, 150e3, 200e3])
+l_c = np.array([10e3, 50e3, 100e3])
 
 P_nl_lc, P_loc, h, A= run_simulation(A, h, u, l_c, nx, nt,
                                  deltax2, dtoverdx,
@@ -120,10 +120,10 @@ x = np.arange(0, nx+1)*deltax
 
 
 plt.figure()
-for t in range(0,nt,int(nt/5)):
+# for t in range(0,nt,int(nt/5)):
 
-    plt.plot(x/1e3, A[t])
-    plt.plot(x/1e3, h[t])
+plt.plot(x/1e3, A[-1])
+plt.plot(x/1e3, h[-1])
 # plt.plot(x/1e3, P_loc[-1][0:-1]/1e3, label = 'local')
 plt.xlabel('x (km)')
 plt.ylabel('A ')
@@ -140,7 +140,7 @@ for i, P_nl in enumerate(P_nl_lc):
     plt.plot(x[2:]/1e3, P_nl[-1][1:]/1e3, 
              color = okabe_ito[i],
              label = r'$l_c = {}$ km'.format(int(l_c[i]/1e3)))
-plt.plot(x[2:]/1e3, P_loc[-1][1:]/1e3, label = r'$P_H$', color ='#777777')
+plt.plot(x[2:]/1e3, P_loc[-1][1:]/1e3, label = r'$P_H$', color ='k')
 plt.xlabel('x (km)')
 plt.ylabel('P (kN/m)')
 leg = ax.legend(
