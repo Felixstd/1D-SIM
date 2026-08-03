@@ -116,7 +116,7 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     
     
     norm = colors.Normalize(vmin=0, vmax=dates[-1])  # assuming k ranges from 0 to 10
-    cmap = plt.cm.viridis
+    cmap = plt.cm.viridis_r
     sm = cm.ScalarMappable(cmap=cmap, norm=norm)
     
     k_idx = [0,2,4,6,8,10,12,14,16,18,19]
@@ -293,8 +293,9 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     
     # ax_all_h.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # ax_all_h.grid()
-    ax_all_h.set_xlabel(r'$x$ (km)')
-    ax_all_h.set_ylabel(r'$h$ (m)')
+    ax_all_h.set_xlabel(r'$x$ (km)', fontsize = 13)
+    ax_all_h.set_ylabel('$A, h$\n(m)',rotation = 0,ha = 'left', fontsize = 13)
+    ax_all_h.yaxis.set_label_coords(-0.25, 0.85) 
     # ax_all_h.set_aspect('equal', 'datalim')
     fig_all_h.colorbar(sm, ax = ax_all_h, label = 'Time (hr)')
     fig_all_h.savefig(figdir+'time_plot_h_{}.png'.format(expno))
@@ -302,8 +303,9 @@ def plot_individual_time(dates, expno, data_dict, dx, dt, figdir, mu_0, mu_infty
     
     # ax_all_h.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     # ax_all_u.grid()
-    ax_all_u.set_xlabel('$x$ (km)')
-    ax_all_u.set_ylabel('$u$ (m/s)')
+    ax_all_u.set_xlabel('$x$ (km)', fontsize = 13)
+    ax_all_u.set_ylabel('$u$\n(m/s)', rotation = 0,ha = 'left', fontsize = 13)
+    ax_all_u.yaxis.set_label_coords(-0.25, 0.85) 
     sm = cm.ScalarMappable(cmap = cmap,
                            norm = norm)
     fig_all_u.colorbar(sm, ax = ax_all_u, 
@@ -704,9 +706,7 @@ def plot_E_VP_resolution(dates, data_exps, Parameters,
             fontsize=10,
             verticalalignment='top', horizontalalignment='left')
             
-        
-            
-            
+           
     fig.supxlabel('x (km)')
     axs[0].set_ylabel('$A, h$ (m)')
     axs[1].set_ylabel(r'$u$ (ms$^{-1}$)')
@@ -722,7 +722,119 @@ def plot_E_VP_resolution(dates, data_exps, Parameters,
     
     fig.savefig(figdir+figname)
     
+def plot_models_resolution(dates, data_exps, Parameters, 
+                           figdir, figname, var = 'h'):
+    """
+    This is a function to plot different models at different resolution. 
     
+    This figure should plot the standard VP and EVP. 
+    
+    The data is organised as:
+        1. VP-1000m
+        2. VP-500m
+        3. VP-250m
+        4. nVP-1000
+        5. nVP-500
+        6. nVP-250
+        7. EVP-1000m
+        8. EVP-500m
+        9. EVP-250m
+        10. nEVP-1000m
+        11. nEVP-500m
+        12. nEVP-250m
+
+    Args:
+        dates (_type_): _description_
+        data_exps (_type_): _description_
+        Parameters (_type_): _description_
+        figdir (_type_): _description_
+        figname (_type_): _description_
+    """
+    
+    plt.rcParams.update({
+        "font.size": 12,
+        # "axes.titlesize": 12,
+        "axes.labelsize": 12,
+        "legend.fontsize": 13,
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+    })
+    
+    dates = dates*Parameters.dt/(60*60)
+    
+    # norm = colors.Normalize(vmin=0, vmax=dates[-1])  # assuming k ranges from 0 to 10
+    # instead of: cmap = plt.get_cmap('viridis_r')
+    base_cmap = plt.get_cmap('viridis_r')
+    cmap = truncate_colormap(base_cmap, 0.1,1) 
+    norm = Normalize(vmin=dates[0], vmax=dates[-1])
+    sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+    
+    
+    k_idx = [0,2,4,6,8,10,12,14,16,18,19]
+    
+    fig, axs2d = plt.subplots(4,3,figsize = (12,9),
+                                               sharex = True,
+                                               sharey='row',
+                                               constrained_layout = True)
+
+    axs = axs2d.T.ravel()
+    axs_row = axs2d.ravel(order='C')
+    print(axs_row[0])
+
+    # exp index -> (h_axis, u_axis)
+    # exp_axes = {1: (axs[0], axs[1]),
+    #             2: (axs[4], axs[5]),
+    #             3: (axs[8], axs[9]), 
+    #             4: (axs[2], axs[3]),
+    #             5: (axs[6], axs[7]),
+    #             6: (axs[10], axs[11])}   # fixed: was colliding with exp 2 before
+
+    date_positions = np.append(dates[::2], dates[-1])
+    colors = cmap(np.linspace(0, 1, len(dates))) 
+    
+    for i, exp in enumerate(Parameters.expno):
+            ax = axs_row[i]
+            data = data_exps[i]
+            h_tot, u_tot, x = data['h'], data['u'], data['x']
+
+            for pos, date in enumerate(date_positions):
+                k = k_idx[pos]
+                
+                h, u = h_tot[k], u_tot[k]
+                if var == 'h':
+                    ax.plot(x[1:-1]/1e3, h[1:-1], label=str(date), color=colors[k])
+                elif var =='u':
+                    ax.plot(x[1:-1]/1e3, u[:-1], color=colors[k]) 
+                
+    labels = ['(a)','(d)','(g)','(j)','(b)','(e)','(h)','(k)','(c)','(f)','(i)','(l)']
+        
+    for i, ax in enumerate(axs):
+        ax.grid()
+        ax.text(0.04, 0.955, labels[i], transform=ax.transAxes,
+            fontsize=10,
+            verticalalignment='top', horizontalalignment='left')
+            
+    
+    if var == 'h':
+        fig.supylabel('$A, h$ (m)',x = -0.03,fontsize = 14)
+    elif var == 'u':
+        fig.supylabel('$u$ (ms$^{-1}$)',x = -0.03,fontsize = 14)
+    fig.supxlabel('x (km)',fontsize = 14)
+    axs[0].set_ylabel('VP:', rotation   = 0, labelpad = 25, fontweight="bold" )
+    axs[1].set_ylabel('nVP:', rotation  = 0, labelpad = 25, fontweight="bold" )
+    axs[2].set_ylabel('EVP:', rotation  = 0, labelpad = 25, fontweight="bold" )
+    axs[3].set_ylabel('nEVP:', rotation  = 0, labelpad = 25, fontweight="bold" )
+    
+    
+    axs[0].set_title(r'$\Delta x = 1$ km')
+    axs[4].set_title(r'$\Delta x = 500$ m')
+    axs[8].set_title(r'$\Delta x = 250$ m')
+    fig.align_ylabels()
+    fig.colorbar(sm, ax = axs[8:], 
+                 aspect = 40,
+                 label = 'Time (hr)')
+    
+    fig.savefig(figdir+figname)
         
         
 def make_figure_A(Parameters, data_exps, n_lines):
@@ -1086,6 +1198,55 @@ def plot_ridgebuilding(Parameters, data_exps):
     fig2.savefig('diff_u.png')
     file_fits.close()
 
+
+def plot_laplacian_p(data_exps, Parameters):
+    
+    dx = Parameters.dx[0]
+    
+    for i, exp in enumerate(Parameters.expno):
+        data = data_exps[i]
+        h = data['h'][-1]
+        A = data['A'][-1]
+        u = data['u'][-1]
+        P = data['base']['P_dates'][-1]
+        
+        x = data['x']
+        
+        laplacian_p = np.zeros_like(P)
+        for i in range(1, len(P)-1):
+            
+            if i == 1:
+                laplacian_p[i] = (P[i+2] - 2*P[i+1] + P[i])/dx**2      
+            elif i == len(P)-1 :
+                laplacian_p[i] = (P[i] - 2*P[i-1] + P[i-2])/dx**2    
+            else:
+                laplacian_p[i] = (P[i+1] - 2*P[i] + P[i-1])/dx**2   
+                
+        P_h = 27.5e3*(h)*np.exp(-20*(1-A))
+        
+        
+        print(A[400:500])
+        plt.figure()
+        ax1 = plt.axes()
+        ax2 = ax1.twinx()
+        ax1.plot(laplacian_p, color  = 'r', label = r'$P_{xx}$')
+        # ax1.plot(P[1:-1], color  = 'r', label = r'$P_{xx}$')
+        ax1.tick_params(axis='y', labelcolor='r')
+        # ax1.set_ylabel('Laplacian of P')
+        # ax1.set_yscale('log')
+        ax2.plot((2*P[1:-1]-P_h[1:-1])/(50e3*A[1:-1])**2, label = r'$P-P_h$')
+        # ax2.plot((P[1:-1]-P_h[1:-1]/2), label = r'$P-P_h$')
+        ax2.set_ylim(5e-6, -5e-6)
+        ax1.set_ylim(5e-6, -5e-6)
+        # ax2.set_yscale('log')
+        ax1.legend()
+        ax2.legend(bbox_to_anchor =(0.4, 0.9))
+        plt.savefig('laplacian_p.png')
+            
+    
+    
+    
+    return
     
     
     
