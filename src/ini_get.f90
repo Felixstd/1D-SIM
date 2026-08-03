@@ -123,6 +123,18 @@ subroutine ini_get (utp, restart, expres, ts_res)
          h(i) = 1d0
 
 
+      elseif (initcond .eq. 'Wall') then 
+         
+         if (i < nx/4) then 
+            h(i) = 5d0
+         else 
+            h(i) = 1d0
+         endif
+
+         A(i) = 1d0
+            
+
+
       endif
 
   enddo
