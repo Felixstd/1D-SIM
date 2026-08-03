@@ -123,7 +123,7 @@ program ice
     ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
 
 
-    T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
+    T = T0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
     Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
 
 !------------------------------------------------------------------------ 
