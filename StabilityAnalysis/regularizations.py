@@ -7,9 +7,9 @@ x = np.linspace(-4, 4, 100000)
 
 
 zeta_1 = np.minimum(abs(1/(x+1e-20)), 1)
-zeta_2 = 1/(np.sqrt(1+x**2))
-zeta_3 = 1/(np.sqrt(0.25+x**2))
-zeta_4 = np.tanh(1/(abs(x)))
+zeta_3 = 1/(np.sqrt(1+x**2))
+zeta_4 = 1/(np.sqrt(0.25+x**2))
+zeta_2 = np.tanh(1/(abs(x)))
 
 labels = [r'max($1/|x|,1$)',r'$1/\sqrt{1+x^2}$',r'$1/\sqrt{0.25+x^2}$',r'$\tanh(1/|x|)$']
 
@@ -50,7 +50,7 @@ for label in ax.get_xticklabels() + ax.get_yticklabels():
     
 
 # plt.subplots_adjust(left=0.25, top=0.85)
-fig.legend(labelcolor = 'linecolor',handlelength=0, bbox_to_anchor = (1.18,0.72))
+fig.legend(labelcolor = 'linecolor',handlelength=0, bbox_to_anchor = (1.2,0.72))
 # plt.tight_layout()
 
 plt.savefig('regularizations.png', bbox_inches='tight')
